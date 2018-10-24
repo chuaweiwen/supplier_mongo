@@ -20,4 +20,10 @@ public class Constant {
     public static final String TABLE_ORDER_ORDERLINE = "orderOrderLine";
 
     public static final String CONFIGURATION_FILE = "config.env";
+
+    public static final String PERFORMANCE_OUTPUT_PATH = "performance_output.txt";
+
+    public static String getTransactionFileLocation(int fileNameWithoutExtension) {
+        return "xact/" + fileNameWithoutExtension + ".txt";
+    }
 }
