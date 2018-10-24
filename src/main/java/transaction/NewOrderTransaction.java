@@ -198,9 +198,9 @@ public class NewOrderTransaction {
 
     private String getDistrictStringId(int dId) {
         if (dId < 10) {
-            return "S_DIST_0" + dId;
+            return "s_dist_0" + dId;
         } else {
-            return "S_DIST_10";
+            return "s_dist_10";
         }
     }
 }
