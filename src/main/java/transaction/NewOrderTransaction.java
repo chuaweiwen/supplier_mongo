@@ -30,6 +30,11 @@ public class NewOrderTransaction {
         this.database = database;
     }
 
+    public void processOrder(int wId, int dId, int cId, int numItems,
+                             int[] itemNum, int[] supplierWarehouse, int[] qty) {
+
+    }
+
     public void close() {
         try {
             writer.close();
