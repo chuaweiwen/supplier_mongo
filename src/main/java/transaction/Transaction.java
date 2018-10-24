@@ -9,13 +9,13 @@ import com.mongodb.client.MongoDatabase;
 
 public class Transaction {
     private NewOrderTransaction newOrderTransaction;
-    private PaymentTransaction paymentTransaction;
-    private DeliveryTransaction deliveryTransaction;
-    private OrderStatusTransaction orderStatusTransaction;
-    private StockLevelTransaction stockLevelTransaction;
-    private PopularItemTransaction popularItemTransaction;
-    private TopBalanceTransaction topBalanceTransaction;
-    private RelatedCustomerTransaction relatedCustomerTransaction;
+    //private PaymentTransaction paymentTransaction;
+    //private DeliveryTransaction deliveryTransaction;
+    //private OrderStatusTransaction orderStatusTransaction;
+    //private StockLevelTransaction stockLevelTransaction;
+    //private PopularItemTransaction popularItemTransaction;
+    //private TopBalanceTransaction topBalanceTransaction;
+    //private RelatedCustomerTransaction relatedCustomerTransaction;
 
     public Transaction(int index, String consistencyLevel, String host, int port, String databaseName) {
         MongoClient mongoClient;
