@@ -3,6 +3,14 @@ package main.java;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoDatabase;
@@ -17,22 +25,47 @@ public class Main {
 
     public static void main(String[] args) {
         if (args.length != 2) {
-            System.out.println("Format: \"[concern] [size]\"");
+            System.out.println("Format: \"[local or majority] [number of clients]\"");
             System.out.println("Example: local 10");
             System.exit(1);
         }
 
-        String concern = args[0];
+        String consistencyLevel = args[0];
         int numTransactions = Integer.parseInt(args[1]);
 
-        Triple<String> configData = readConfigFile();
+        Triple<String, String, String> configData = readConfigFile();
 
-        String host = configData.first();
-        int port = Integer.parseInt(configData.second());
-        String databaseName = configData.third();
+        String host = configData.first;
+        int port = Integer.parseInt(configData.second);
+        String databaseName = configData.third;
+
+        ExecutorService executorService = Executors.newFixedThreadPool(Math.max(1, numTransactions));
+        List<Future<Triple<Integer, Long, Double>>> futureMeasurements =
+                new ArrayList<Future<Triple<Integer, Long, Double>>>();
+
+        for (int i = 1; i < numTransactions; i++) {
+            Future<Triple<Integer, Long, Double>> future =
+                    executorService.submit(new ClientThread(i, consistencyLevel, host, port, databaseName));
+            futureMeasurements.add(future);
+        }
+
+        Map<Integer, Triple<Integer, Long, Double>> measurementMap =
+                new HashMap<Integer, Triple<Integer, Long, Double>>();
+        for (Future<Triple<Integer, Long, Double>> future : futureMeasurements) {
+            try {
+                Triple<Integer, Long, Double> tuple = future.get();
+                measurementMap.put(tuple.first, tuple);
+            } catch (InterruptedException e){
+                e.printStackTrace();
+                return;
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
     }
 
-    private static Triple<String> readConfigFile() {
+    private static Triple<String, String, String> readConfigFile() {
         String host = Constant.DEFAULT_HOST;
         String port = Constant.DEFAULT_PORT;
         String databaseName = Constant.DEFAULT_DATABASE;
@@ -59,30 +92,6 @@ public class Main {
             e.printStackTrace();
         }
 
-        return new Triple(host, port, databaseName);
-    }
-}
-
-class Triple<T> {
-    private T first;
-    private T second;
-    private T third;
-
-    public Triple(T first, T second, T third) {
-        this.first = first;
-        this.second = second;
-        this.third = third;
-    }
-
-    public T first() {
-        return this.first;
-    }
-
-    public T second() {
-        return this.second;
-    }
-
-    public T third() {
-        return this.third;
+        return new Triple<String, String, String>(host, port, databaseName);
     }
 }
