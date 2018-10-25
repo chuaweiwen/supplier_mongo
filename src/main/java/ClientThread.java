@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.util.concurrent.Callable;
 
-import main.java.transaction.Transaction;
-
 public class ClientThread implements Callable<ClientStatistics> {
     public static final char XACT_NEW_ORDER = 'N';
     public static final char XACT_PAYMENT = 'P';
