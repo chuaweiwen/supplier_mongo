@@ -31,7 +31,7 @@ public class ClientThread implements Callable<ClientStatistics> {
 
     private ClientStatistics readTransaction() {
         File file = new File(Constant.getTransactionFileLocation(index+1));
-        Transaction transaction = new Transaction(index, this.consistencyLevel, this.host, this.port, this.database);
+        Transaction transaction = new Transaction(this.consistencyLevel, this.host, this.port, this.database);
         long[] transactionCount = new long[8];
         long[] executionTime = new long[8];
 

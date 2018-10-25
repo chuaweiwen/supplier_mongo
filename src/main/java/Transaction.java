@@ -11,13 +11,13 @@ public class Transaction {
     private NewOrderTransaction newOrderTransaction;
     //private PaymentTransaction paymentTransaction;
     //private DeliveryTransaction deliveryTransaction;
-    //private OrderStatusTransaction orderStatusTransaction;
+    private OrderStatusTransaction orderStatusTransaction;
     //private StockLevelTransaction stockLevelTransaction;
     //private PopularItemTransaction popularItemTransaction;
     //private TopBalanceTransaction topBalanceTransaction;
     //private RelatedCustomerTransaction relatedCustomerTransaction;
 
-    public Transaction(int index, String consistencyLevel, String host, int port, String databaseName) {
+    public Transaction(String consistencyLevel, String host, int port, String databaseName) {
         MongoClient mongoClient;
         if (consistencyLevel.equalsIgnoreCase("local")) {
             mongoClient = new MongoClient(
@@ -39,7 +39,7 @@ public class Transaction {
         newOrderTransaction = new NewOrderTransaction(database);
         //paymentTransaction = new PaymentTransaction(database);
         //deliveryTransaction = new DeliveryTransaction(database);
-        //orderStatusTransaction = new OrderStatusTransaction(database);
+        orderStatusTransaction = new OrderStatusTransaction(database);
         //stockLevelTransaction = new StockLevelTransaction(database);
         //popularItemTransaction = new PopularItemTransaction(database);
         //topBalanceTransaction = new TopBalanceTransaction(database);
@@ -60,7 +60,7 @@ public class Transaction {
     }
 
     public void processOrderStatus(int wId, int dId, int cId) {
-        //orderStatusTransaction.processOrderStatus(wId, dId, cId);
+        orderStatusTransaction.processOrderStatus(wId, dId, cId);
     }
 
     public void processStockLevel(int wId, int dId, long T, int L) {
