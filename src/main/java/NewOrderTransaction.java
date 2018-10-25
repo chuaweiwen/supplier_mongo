@@ -103,7 +103,7 @@ public class NewOrderTransaction {
         }
         totalAmount = totalAmount * (1 + dTax + wTax) * (1 - customer.getDouble(Customer.C_DISCOUNT));
 
-        database.getCollection(Table.ORDER).insertOne(
+        database.getCollection(Table.ORDER_ORDERLINE).insertOne(
                 new Document(Order.O_W_ID, wId)
                         .append(Order.O_D_ID, dId)
                         .append(Order.O_ENTRY_D, currentDate)
