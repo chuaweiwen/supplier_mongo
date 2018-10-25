@@ -75,11 +75,11 @@ public class Main {
 
             while ((line = br.readLine()) != null) {
                 String[] lineValue = line.split("=");
-                if (lineValue[0] == HOST_KEY) {
+                if (lineValue[0].equals(HOST_KEY)) {
                     host = lineValue[1];
-                } else if (lineValue[0] == PORT_KEY) {
+                } else if (lineValue[0].equals(PORT_KEY)) {
                     port = lineValue[1];
-                } else if (lineValue[0] == DATABASE_KEY) {
+                } else if (lineValue[0].equals(DATABASE_KEY)) {
                     databaseName = lineValue[1];
                 }
             }
