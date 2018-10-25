@@ -16,10 +16,6 @@ import java.util.concurrent.Future;
 
 public class Main {
 
-    public static final String HOST_KEY = "HOST";
-    public static final String PORT_KEY = "PORT";
-    public static final String DATABASE_KEY = "DATABASE";
-
     public static void main(String[] args) {
         if (args.length != 2) {
             System.out.println("Format: \"[local or majority] [number of clients]\"");
@@ -45,7 +41,7 @@ public class Main {
             results.add(future);
         }
 
-        Map<Integer, ClientStatistics> statisticsMap = new HashMap();
+        Map<Integer, ClientStatistics> statisticsMap = new HashMap<Integer, ClientStatistics>();
         for (Future<ClientStatistics> future : results) {
             try {
                 ClientStatistics statistics = future.get();
@@ -75,11 +71,11 @@ public class Main {
 
             while ((line = br.readLine()) != null) {
                 String[] lineValue = line.split("=");
-                if (lineValue[0].equals(HOST_KEY)) {
+                if (lineValue[0].equals(Constant.HOST_KEY)) {
                     host = lineValue[1];
-                } else if (lineValue[0].equals(PORT_KEY)) {
+                } else if (lineValue[0].equals(Constant.PORT_KEY)) {
                     port = lineValue[1];
-                } else if (lineValue[0].equals(DATABASE_KEY)) {
+                } else if (lineValue[0].equals(Constant.DATABASE_KEY)) {
                     databaseName = lineValue[1];
                 }
             }
