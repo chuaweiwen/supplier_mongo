@@ -1,4 +1,4 @@
-package main.java.transaction;
+package main.java;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
