@@ -4,14 +4,18 @@ package main.java;
  * Constants used for the application
  */
 public class Constant {
-    public static final String DEFAULT_HOST = "localhost";
-    public static final String DEFAULT_PORT = "27017";
-    public static final String DEFAULT_DATABASE = "supplier";
+    static final String DEFAULT_HOST = "localhost";
+    static final String DEFAULT_PORT = "27017";
+    static final String DEFAULT_DATABASE = "supplier";
 
-    public static final String CONFIGURATION_FILE = "config.env";
-    public static final String PERFORMANCE_OUTPUT_PATH = "performance_output.txt";
+    static final String HOST_KEY = "HOST";
+    static final String PORT_KEY = "PORT";
+    static final String DATABASE_KEY = "DATABASE";
 
-    public static String getTransactionFileLocation(int fileNameWithoutExtension) {
+    static final String CONFIGURATION_FILE = "config.env";
+    static final String PERFORMANCE_OUTPUT_PATH = "performance_output.txt";
+
+    static String getTransactionFileLocation(int fileNameWithoutExtension) {
         return "xact/" + fileNameWithoutExtension + ".txt";
     }
 }

@@ -6,18 +6,17 @@ import java.io.FileReader;
 import java.util.concurrent.Callable;
 
 public class ClientThread implements Callable<ClientStatistics> {
-    public static final char XACT_NEW_ORDER = 'N';
-    public static final char XACT_PAYMENT = 'P';
-    public static final char XACT_DELIVERY = 'D';
-    public static final char XACT_ORDER_STATUS = 'O';
-    public static final char XACT_STOCK_LEVEL = 'S';
-    public static final char XACT_POPULAR_ITEM = 'I';
-    public static final char XACT_TOP_BALANCE = 'T';
-    public static final char XACT_RELATED_CUSTOMER = 'R';
+    private static final char XACT_NEW_ORDER = 'N';
+    private static final char XACT_PAYMENT = 'P';
+    private static final char XACT_DELIVERY = 'D';
+    private static final char XACT_ORDER_STATUS = 'O';
+    private static final char XACT_STOCK_LEVEL = 'S';
+    private static final char XACT_POPULAR_ITEM = 'I';
+    private static final char XACT_TOP_BALANCE = 'T';
+    private static final char XACT_RELATED_CUSTOMER = 'R';
 
     private int index;
     private String consistencyLevel;
-    private Transaction transaction;
     private String host;
     private int port;
     private String database;
@@ -30,9 +29,9 @@ public class ClientThread implements Callable<ClientStatistics> {
         this.database = database;
     }
 
-    public ClientStatistics readTransaction() {
+    private ClientStatistics readTransaction() {
         File file = new File(Constant.getTransactionFileLocation(index+1));
-        transaction = new Transaction(index, this.consistencyLevel, this.host, this.port, this.database);
+        Transaction transaction = new Transaction(index, this.consistencyLevel, this.host, this.port, this.database);
         long[] transactionCount = new long[8];
         long[] executionTime = new long[8];
 
