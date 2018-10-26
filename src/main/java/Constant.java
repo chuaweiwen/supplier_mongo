@@ -7,10 +7,14 @@ public class Constant {
     static final String DEFAULT_HOST = "localhost";
     static final String DEFAULT_PORT = "27017";
     static final String DEFAULT_DATABASE = "supplier";
+    static final String DEFAULT_CONSISTENCY_LEVEL = "local";
+    static final String DEFAULT_NUMBER_OF_TRANSACTIONS = "10";
 
     static final String HOST_KEY = "HOST";
     static final String PORT_KEY = "PORT";
     static final String DATABASE_KEY = "DATABASE";
+    static final String CONSISTENCY_LEVEL_KEY = "CONSISTENCY_LEVEL";
+    static final String NUMBER_OF_TRANSACTIONS_KEY = "NUMBER_OF_TRANSACTIONS";
 
     static final String CONFIGURATION_FILE = "config.env";
     static final String PERFORMANCE_OUTPUT_PATH = "performance_output.txt";

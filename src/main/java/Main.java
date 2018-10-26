@@ -17,20 +17,13 @@ import java.util.concurrent.Future;
 public class Main {
 
     public static void main(String[] args) {
-        if (args.length != 2) {
-            System.out.println("Format: \"[local or majority] [number of clients]\"");
-            System.out.println("Example: local 10");
-            System.exit(1);
-        }
+        String[] configData = readConfigFile();
 
-        String consistencyLevel = args[0];
-        int numTransactions = Integer.parseInt(args[1]);
-
-        Triple<String, String, String> configData = readConfigFile();
-
-        String host = configData.first;
-        int port = Integer.parseInt(configData.second);
-        String databaseName = configData.third;
+        String host = configData[0];
+        int port = Integer.parseInt(configData[1]);
+        String databaseName = configData[2];
+        String consistencyLevel = configData[3];
+        int numTransactions = Integer.parseInt(configData[4]);
 
         ExecutorService executorService = Executors.newFixedThreadPool(Math.max(1, numTransactions));
         List<Future<ClientStatistics>> results = new ArrayList<Future<ClientStatistics>>();
@@ -59,10 +52,12 @@ public class Main {
         System.out.println("\nAll " + numTransactions + " clients have completed their transactions.");
     }
 
-    private static Triple<String, String, String> readConfigFile() {
+    private static String[] readConfigFile() {
         String host = Constant.DEFAULT_HOST;
         String port = Constant.DEFAULT_PORT;
         String databaseName = Constant.DEFAULT_DATABASE;
+        String consistencyLevel = Constant.DEFAULT_CONSISTENCY_LEVEL;
+        String numberOfTransactions = Constant.DEFAULT_NUMBER_OF_TRANSACTIONS;
 
         String line;
         try {
@@ -77,6 +72,10 @@ public class Main {
                     port = lineValue[1];
                 } else if (lineValue[0].equals(Constant.DATABASE_KEY)) {
                     databaseName = lineValue[1];
+                } else if (lineValue[0].equals(Constant.CONSISTENCY_LEVEL_KEY)) {
+                    consistencyLevel = lineValue[1];
+                } else if (lineValue[0].equals(Constant.NUMBER_OF_TRANSACTIONS_KEY)) {
+                    numberOfTransactions = lineValue[1];
                 }
             }
             br.close();
@@ -86,7 +85,8 @@ public class Main {
             e.printStackTrace();
         }
 
-        return new Triple<String, String, String>(host, port, databaseName);
+        String[] configData = {host, port, databaseName, consistencyLevel, numberOfTransactions};
+        return configData;
     }
 
     private static void outputPerformanceResults(Map<Integer, ClientStatistics> statisticsMap) {
@@ -169,17 +169,5 @@ public class Main {
             System.out.println("Error in outputting performance results.");
             e.printStackTrace();
         }
-    }
-}
-
-class Triple<F, S, T> {
-    public F first;
-    public S second;
-    public T third;
-
-    public Triple(F first, S second, T third) {
-        this.first = first;
-        this.second = second;
-        this.third = third;
     }
 }
