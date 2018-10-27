@@ -52,7 +52,7 @@ public class Main {
         System.out.println("\nAll " + numTransactions + " clients have completed their transactions.");
     }
 
-    private static String[] readConfigFile() {
+    public static String[] readConfigFile() {
         String host = Constant.DEFAULT_HOST;
         String port = Constant.DEFAULT_PORT;
         String databaseName = Constant.DEFAULT_DATABASE;
