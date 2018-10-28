@@ -125,7 +125,7 @@ public class TableUpdate {
 
             warehouseTable.updateOne(warehouse, updateObject);
         }
-        warehouseTable.renameCollection(new MongoNamespace(Table.WAREHOUSE_DISTRICT));
+        //warehouseTable.renameCollection(new MongoNamespace(Table.WAREHOUSE_DISTRICT));
         System.out.println("Combined warehouse and district");
     }
 
@@ -194,7 +194,7 @@ public class TableUpdate {
 
             orderTable.updateOne(searchOrder, updateObj);
         }
-        orderTable.renameCollection(new MongoNamespace(Table.ORDER_ORDERLINE));
+        //orderTable.renameCollection(new MongoNamespace(Table.ORDER_ORDERLINE));
         System.out.println("Combined order and order-line");
     }
 }

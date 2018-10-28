@@ -33,8 +33,8 @@ class Table {
     static final String STOCK = "stock";
     static final String ORDERLINE = "orderline";
 
-    static final String WAREHOUSE_DISTRICT = "warehouseDistrict";
-    static final String ORDER_ORDERLINE = "orderOrderLine";
+    //static final String WAREHOUSE_DISTRICT = "warehouseDistrict";
+    //static final String ORDER_ORDERLINE = "orderOrderLine";
 }
 
 class Warehouse {

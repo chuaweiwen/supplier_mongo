@@ -72,7 +72,7 @@ public class OrderStatusTransaction {
     }
 
     private Document selectOrder(int oId) {
-        MongoCollection<Document> collection = database.getCollection(Table.ORDER_ORDERLINE);
+        MongoCollection<Document> collection = database.getCollection(Table.ORDER);
         return collection.find(eq(Order.O_ID, oId)).first();
     }
 }
