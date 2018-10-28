@@ -103,7 +103,7 @@ public class NewOrderTransaction {
         }
         totalAmount = totalAmount * (1 + dTax + wTax) * (1 - customer.getDouble(Customer.C_DISCOUNT));
 
-        database.getCollection(Table.ORDER_ORDERLINE).insertOne(
+        database.getCollection(Table.ORDER).insertOne(
                 new Document(Order.O_W_ID, wId)
                         .append(Order.O_D_ID, dId)
                         .append(Order.O_ENTRY_D, currentDate)
@@ -132,7 +132,7 @@ public class NewOrderTransaction {
     }
 
     private Document selectWarehouse(int wId) {
-        MongoCollection<Document> collection = database.getCollection(Table.WAREHOUSE_DISTRICT);
+        MongoCollection<Document> collection = database.getCollection(Table.WAREHOUSE);
         return collection.find(eq(Warehouse.W_ID, wId)).first();
     }
 
@@ -159,7 +159,7 @@ public class NewOrderTransaction {
     }
 
     private void updateDistrictNextOId(int nextOId, int wId, int dId) {
-        MongoCollection<Document> collection = database.getCollection(Table.WAREHOUSE_DISTRICT);
+        MongoCollection<Document> collection = database.getCollection(Table.WAREHOUSE);
 
         BasicDBObject searchQuery = new BasicDBObject();
         searchQuery.put(Warehouse.W_ID, wId);
