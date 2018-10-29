@@ -58,7 +58,12 @@ public class OrderStatusTransaction {
         for (Document orderLine : orderLines) {
             int iId = orderLine.getInteger(OrderLine.OL_I_ID);
             int supplierWId = orderLine.getInteger(OrderLine.OL_SUPPLY_W_ID);
-            int quantity = orderLine.getInteger(OrderLine.OL_QUANTITY);
+            double quantity = 0.0;
+            try {
+                quantity = orderLine.getInteger(OrderLine.OL_QUANTITY);
+            } catch (ClassCastException e) {
+                quantity = (double) orderLine.getInteger(OrderLine.OL_QUANTITY);
+            }
             double amount = orderLine.getDouble(OrderLine.OL_AMOUNT);
             String deliveryData = orderLine.getString(OrderLine.OL_DELIVERY_D);
 

@@ -71,7 +71,12 @@ public class NewOrderTransaction {
             int quantity = qty[i];
 
             Document stock = selectStock(iWId, iId);
-            double adjQuantity = stock.getDouble(Stock.S_QUANTITY) - quantity;
+            double adjQuantity = 0.0;
+            try {
+                adjQuantity = stock.getDouble(Stock.S_QUANTITY) - quantity;
+            } catch (ClassCastException e) {
+                adjQuantity = (double) stock.getInteger(Stock.S_QUANTITY) - quantity;
+            }
             while (adjQuantity < 10) {
                 adjQuantity += 100;
             }
