@@ -102,11 +102,6 @@ public class Main {
             ClientStatistics min = statisticsMap.get(1);
             ClientStatistics max = statisticsMap.get(1);
 
-            System.out.println("client test: " + numClients + " ");
-            if (min == null) {
-                System.out.println("NULLLL!!!!");
-            }
-
             double totalThroughput = 0;
             for (ClientStatistics current : statisticsMap.values()) {
                 double currentThroughput = current.getThroughput();
