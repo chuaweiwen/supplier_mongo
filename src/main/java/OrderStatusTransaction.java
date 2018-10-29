@@ -3,7 +3,6 @@ package main.java;
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 
-import java.util.Date;
 import java.util.List;
 
 import org.bson.Document;
@@ -28,10 +27,16 @@ public class OrderStatusTransaction {
         double balance = customer.getDouble(Customer.C_BALANCE);
 
         int oId = customer.getInteger(Customer.C_LAST_O_ID);
-        Date entryDate = customer.getDate(Customer.C_LAST_O_ENTRY_D);
-        int carrierId = customer.getInteger(Customer.C_LAST_O_CARRIER_ID);
+        String entryDate = customer.getString(Customer.C_LAST_O_ENTRY_D);
+        int carrierId = 0;
+        boolean isNull = false;
+        try {
+            carrierId = customer.getInteger(Customer.C_LAST_O_CARRIER_ID);
+        } catch (ClassCastException e) {
+            isNull = true;
+        }
 
-        Document order = selectOrder(oId);
+        Document order = selectOrder(wId, dId, cId, oId);
         List<Document> orderLines = (List<Document>) order.get(Order.O_ORDERLINES);
 
         // Print customer information
@@ -41,7 +46,11 @@ public class OrderStatusTransaction {
         // Print customer's last order
         System.out.println("Last Order ID: " + oId);
         System.out.println("Entry date and time: " + entryDate);
-        System.out.println("Carrier identifier: " + carrierId);
+        if (isNull) {
+            System.out.println("Carrier identifier: null");
+        } else {
+            System.out.println("Carrier identifier: " + carrierId);
+        }
 
         System.out.println("====================");
 
@@ -49,9 +58,9 @@ public class OrderStatusTransaction {
         for (Document orderLine : orderLines) {
             int iId = orderLine.getInteger(OrderLine.OL_I_ID);
             int supplierWId = orderLine.getInteger(OrderLine.OL_SUPPLY_W_ID);
-            double quantity = orderLine.getDouble(OrderLine.OL_QUANTITY);
+            int quantity = orderLine.getInteger(OrderLine.OL_QUANTITY);
             double amount = orderLine.getDouble(OrderLine.OL_AMOUNT);
-            Date deliveryData = orderLine.getDate(OrderLine.OL_DELIVERY_D);
+            String deliveryData = orderLine.getString(OrderLine.OL_DELIVERY_D);
 
             System.out.println("Item number: " + iId);
             System.out.println("Supplying warehouse number: " + supplierWId);
@@ -71,8 +80,13 @@ public class OrderStatusTransaction {
         )).first();
     }
 
-    private Document selectOrder(int oId) {
+    private Document selectOrder(int wId, int dId, int cId, int oId) {
         MongoCollection<Document> collection = database.getCollection(Table.ORDER);
-        return collection.find(eq(Order.O_ID, oId)).first();
+        return collection.find(and(
+                eq(Order.O_W_ID, wId),
+                eq(Order.O_D_ID, dId),
+                eq(Order.O_C_ID, cId),
+                eq(Order.O_ID, oId)
+        )).first();
     }
 }

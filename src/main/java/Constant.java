@@ -137,6 +137,11 @@ class Stock {
     static final String S_REMOTE_CNT = "s_remote_cnt";
     static final String S_DATA = "s_data";
 
+    static final String S_I_NAME = "s_i_name";
+    static final String S_I_PRICE = "s_i_price";
+    static final String S_I_IM_ID = "s_i_im_id";
+    static final String S_I_DATA = "s_i_data";
+
     static String getDistrictStringId(int dId) {
         if (dId < 10) {
             return "s_dist_0" + dId;

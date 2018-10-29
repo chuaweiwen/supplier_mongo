@@ -2,13 +2,14 @@ package main.java;
 
 import org.bson.Document;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
 import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,6 +20,7 @@ public class NewOrderTransaction {
 
     private static final String CLASS_NAME = "NewOrderTransaction";
     private static final String EXCEPTION_DISTRICTS_NOT_FOUND = CLASS_NAME + " - Districts not found";
+    private static final DateFormat DF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     public NewOrderTransaction(MongoDatabase database) {
         this.database = database;
@@ -49,7 +51,7 @@ public class NewOrderTransaction {
         int nextOId = district.getInteger(District.D_NEXT_O_ID);
         updateDistrictNextOId(nextOId + 1, wId, dId);
 
-        Date currentDate = new Date();
+        String currentDate = DF.format(new Date());
 
         double allLocal = 1;
         String[] itemOutput = new String[numItems];
@@ -66,7 +68,7 @@ public class NewOrderTransaction {
         for (int i = 0; i < numItems; i++) {
             int iId = itemNum[i];
             int iWId = supplierWarehouse[i];
-            double quantity = qty[i];
+            int quantity = qty[i];
 
             Document stock = selectStock(iWId, iId);
             double adjQuantity = stock.getDouble(Stock.S_QUANTITY) - quantity;
@@ -81,9 +83,9 @@ public class NewOrderTransaction {
                             ? stock.getInteger(Stock.S_REMOTE_CNT) + 1
                             : stock.getInteger(Stock.S_REMOTE_CNT));
 
-            Document item = selectItem(iId);
-            String itemName = item.getString(Item.I_NAME);
-            double itemAmount = item.getDouble(Item.I_PRICE) * quantity;
+            //Document item = selectItem(iId);
+            String itemName = stock.getString(Stock.S_I_NAME);
+            double itemAmount = stock.getDouble(Stock.S_I_PRICE) * quantity;
             totalAmount += itemAmount;
 
             // Order line
@@ -159,31 +161,32 @@ public class NewOrderTransaction {
     }
 
     private void updateDistrictNextOId(int nextOId, int wId, int dId) {
-        MongoCollection<Document> collection = database.getCollection(Table.WAREHOUSE);
+        MongoCollection collection = database.getCollection(Table.WAREHOUSE);
 
-        BasicDBObject searchQuery = new BasicDBObject();
+        Document searchQuery = new Document();
         searchQuery.put(Warehouse.W_ID, wId);
         searchQuery.put(Warehouse.W_DISTRICTS + "." + District.D_ID, dId);
 
-        BasicDBObject newDocument = new BasicDBObject();
-        BasicDBObject updateQuery = new BasicDBObject("$set", newDocument);
+        Document newDocument = new Document();
+        Document updateQuery = new Document("$set", newDocument);
         newDocument.put(Warehouse.W_DISTRICTS + ".$." + District.D_NEXT_O_ID, nextOId);
 
         collection.updateOne(searchQuery, updateQuery);
     }
 
-    private void updateCustomerLastOrder(int nextOId, int wId, int dId, int cId, Date currentDate) {
+    private void updateCustomerLastOrder(int nextOId, int wId, int dId, int cId, String currentDate) {
         MongoCollection<Document> collection = database.getCollection(Table.CUSTOMER);
 
-        BasicDBObject searchQuery = new BasicDBObject();
+        Document searchQuery = new Document();
         searchQuery.put(Customer.C_W_ID, wId);
         searchQuery.put(Customer.C_D_ID, dId);
         searchQuery.put(Customer.C_ID, cId);
 
-        BasicDBObject newDocument = new BasicDBObject();
-        BasicDBObject updateQuery = new BasicDBObject("$set", newDocument);
+        Document newDocument = new Document();
+        Document updateQuery = new Document("$set", newDocument);
         newDocument.put(Customer.C_LAST_O_ID, nextOId);
         newDocument.put(Customer.C_LAST_O_ENTRY_D, currentDate);
+        newDocument.put(Customer.C_LAST_O_CARRIER_ID, "null");
 
         collection.updateOne(searchQuery, updateQuery);
     }
@@ -191,12 +194,12 @@ public class NewOrderTransaction {
     private void updateStock(int wId, int iId, double qty, double sYtd, int orderCnt, int remoteCnt) {
         MongoCollection<Document> collection = database.getCollection(Table.STOCK);
 
-        BasicDBObject find = new BasicDBObject();
+        Document find = new Document();
         find.put(Stock.S_W_ID, wId);
         find.put(Stock.S_I_ID, iId);
 
-        BasicDBObject carrier = new BasicDBObject();
-        BasicDBObject set = new BasicDBObject("$set", carrier);
+        Document carrier = new Document();
+        Document set = new Document("$set", carrier);
         carrier.put(Stock.S_QUANTITY, qty);
         carrier.put(Stock.S_YTD, sYtd);
         carrier.put(Stock.S_ORDER_CNT, orderCnt);
