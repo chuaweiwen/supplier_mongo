@@ -88,7 +88,6 @@ public class NewOrderTransaction {
                             ? stock.getInteger(Stock.S_REMOTE_CNT) + 1
                             : stock.getInteger(Stock.S_REMOTE_CNT));
 
-            //Document item = selectItem(iId);
             String itemName = stock.getString(Stock.S_I_NAME);
             double itemAmount = stock.getDouble(Stock.S_I_PRICE) * quantity;
             totalAmount += itemAmount;
@@ -118,9 +117,9 @@ public class NewOrderTransaction {
                         .append(Order.O_C_ID, cId)
                         .append(Order.O_OL_CNT, numItems)
                         .append(Order.O_ALL_LOCAL, allLocal)
-                        //.append("o_c_first", customer.getString("c_first"))
-                        //.append("o_c_middle", customer.getString("c_middle"))
-                        //.append("o_c_last", customer.getString("c_last"))
+                        .append(Order.O_C_FIRST, customer.getString(Customer.C_FIRST))
+                        .append(Order.O_C_MIDDLE, customer.getString(Customer.C_MIDDLE))
+                        .append(Order.O_C_LAST, customer.getString(Customer.C_LAST))
                         .append(Order.O_ORDERLINES, orderLines));
 
         /**
@@ -150,11 +149,6 @@ public class NewOrderTransaction {
                 eq(Customer.C_D_ID, dId),
                 eq(Customer.C_ID, cId)
         )).first();
-    }
-
-    private Document selectItem(int iId) {
-        MongoCollection<Document> collection = database.getCollection(Table.ITEM);
-        return collection.find(eq(Item.I_ID, iId)).first();
     }
 
     private Document selectStock(int iWId, int iId) {
