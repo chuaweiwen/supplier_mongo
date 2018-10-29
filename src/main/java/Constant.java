@@ -18,6 +18,7 @@ public class Constant {
 
     static final String CONFIGURATION_FILE = "config.env";
     static final String PERFORMANCE_OUTPUT_PATH_WITHOUT_EXTENSION = "performance_output";
+    static final String TABLE_UPDATE_OUTPUT_PATH = "table_update_status.txt";
 
     static String getTransactionFileLocation(int fileNameWithoutExtension) {
         return "xact/" + fileNameWithoutExtension + ".txt";
@@ -36,9 +37,6 @@ class Table {
     static final String ITEM = "item";
     static final String STOCK = "stock";
     static final String ORDERLINE = "orderline";
-
-    //static final String WAREHOUSE_DISTRICT = "warehouseDistrict";
-    //static final String ORDER_ORDERLINE = "orderOrderLine";
 }
 
 class Warehouse {
@@ -107,6 +105,9 @@ class Order {
     static final String O_ENTRY_D = "o_entry_d";
 
     static final String O_ORDERLINES = "o_orderlines";
+    static final String O_C_FIRST = "o_c_first";
+    static final String O_C_MIDDLE = "o_c_middle";
+    static final String O_C_LAST = "o_c_last";
 }
 
 class Item {

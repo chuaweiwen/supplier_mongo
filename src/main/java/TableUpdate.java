@@ -1,5 +1,8 @@
 package main.java;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+
 import org.bson.Document;
 
 import com.mongodb.MongoClient;
@@ -18,6 +21,7 @@ import com.mongodb.client.MongoDatabase;
  */
 public class TableUpdate {
     private MongoDatabase database;
+    private PrintWriter pw;
 
     public static void main (String[] args) {
         String[] configData = Main.readConfigFile();
@@ -50,19 +54,33 @@ public class TableUpdate {
 
     public TableUpdate(MongoDatabase database) {
         this.database = database;
+        try {
+            this.pw = new PrintWriter(Constant.TABLE_UPDATE_OUTPUT_PATH);
+        } catch (FileNotFoundException e) {
+            System.out.println("Error in writing Table Update file");
+            e.printStackTrace();
+        }
     }
 
     public void run() {
-        createIndexes();
-        updateCustomerLastOrder();
+        long startTime = System.nanoTime();
+        createIndexes(); // must run first before the rest
+        addItemNameToOrderLine(); // must run this before combineOrderAndOrderLine()
+        addLastOrderToCustomer();
+        addCustomerNameToOrder();
         combineWarehouseAndDistrict();
-        addItemNameToOrderLine();
         combineStockAndItem();
         combineOrderAndOrderLine();
+
+        System.out.println("Total time taken to update data: "
+                + (((System.nanoTime() - startTime) / 1000000000)/60.0) + " minutes");
+        pw.close();
     }
 
     private void createIndexes() {
         System.out.println("Creating index for " + Table.WAREHOUSE);
+        pw.println("Creating index for " + Table.WAREHOUSE);
+
         database.getCollection(Table.WAREHOUSE).createIndex(new Document(Warehouse.W_ID,1));
 
         System.out.println("Creating index for " + Table.CUSTOMER);
@@ -87,6 +105,8 @@ public class TableUpdate {
         database.getCollection(Table.ORDER).createIndex(new Document(Order.O_D_ID,1));
         database.getCollection(Table.ORDER).createIndex(new Document(Order.O_ID,1));
 
+        database.getCollection(Table.ORDER).createIndex(new Document(Order.O_C_ID,1));
+
         System.out.println("Creating index for " + Table.ITEM);
         database.getCollection(Table.ITEM).createIndex(new Document(Item.I_ID,1));
 
@@ -96,10 +116,46 @@ public class TableUpdate {
         database.getCollection(Table.STOCK).createIndex(new Document(Stock.S_I_ID,1));
 
         System.out.println("Indexes have been successfully created.");
+        pw.println("Indexes have been successfully created.");
     }
 
-    private void updateCustomerLastOrder() {
+    private void addItemNameToOrderLine() {
+        System.out.println("Adding " + Item.I_NAME + " to " + Table.ORDERLINE);
+        pw.println("Adding " + Item.I_NAME + " to " + Table.ORDERLINE);
+
+        MongoCollection itemTable = database.getCollection(Table.ITEM);
+        MongoCollection orderLineTable = database.getCollection(Table.ORDERLINE);
+
+        FindIterable findIterable = itemTable.find();
+        findIterable.noCursorTimeout(true);
+        MongoCursor cursor = findIterable.iterator();
+
+        int i = 0;
+        long time = System.nanoTime();
+        while (cursor.hasNext()) {
+            Document itemObject = (Document) cursor.next();
+            Document item = new Document();
+            item.append(OrderLine.OL_I_NAME, itemObject.getString(Item.I_NAME));
+
+            Document searchOrderLine = new Document();
+            searchOrderLine.append(OrderLine.OL_I_ID, itemObject.getInteger(Item.I_ID));
+
+            Document updateObj = new Document();
+            updateObj.append("$set", item);
+
+            orderLineTable.updateMany(searchOrderLine, updateObj);
+            i++;
+            if (i % 1000 == 0) {
+                System.out.println((Math.round(((i / 100000.0) * 100))) + "% " + ((System.nanoTime() - time) / 1000000000));
+            }
+        }
+        System.out.println("Added " + Item.I_NAME + " to " + Table.ORDERLINE);
+        pw.println("Added " + Item.I_NAME + " to " + Table.ORDERLINE);
+    }
+
+    private void addLastOrderToCustomer() {
         System.out.println("Updating " + Table.CUSTOMER + " last order");
+        pw.println("Updating " + Table.CUSTOMER + " last order");
 
         MongoCollection orders = database.getCollection(Table.ORDER);
         MongoCollection customerCollection = database.getCollection(Table.CUSTOMER);
@@ -149,10 +205,51 @@ public class TableUpdate {
             }
         }
         System.out.println("Updated " + Table.CUSTOMER + " last order");
+        pw.println("Updated " + Table.CUSTOMER + " last order");
+    }
+
+    private void addCustomerNameToOrder() {
+        System.out.println("Adding customer name to " + Table.ORDER);
+        pw.println("Adding customer name to " + Table.ORDER);
+
+        MongoCollection customerTable = database.getCollection(Table.CUSTOMER);
+        MongoCollection orderTable = database.getCollection(Table.ORDER);
+
+        FindIterable findIterable = customerTable.find();
+        findIterable.noCursorTimeout(true);
+        MongoCursor cursor = findIterable.iterator();
+
+        int i = 0;
+        long time = System.nanoTime();
+        while (cursor.hasNext()) {
+            Document customerObject = (Document) cursor.next();
+            Document customerName = new Document();
+            customerName.append(Order.O_C_FIRST, customerObject.getString(Customer.C_FIRST));
+            customerName.append(Order.O_C_MIDDLE, customerObject.getString(Customer.C_MIDDLE));
+            customerName.append(Order.O_C_LAST, customerObject.getString(Customer.C_LAST));
+
+            Document searchOrder = new Document();
+            searchOrder.append(Order.O_W_ID, customerObject.getInteger(Customer.C_W_ID));
+            searchOrder.append(Order.O_D_ID, customerObject.getInteger(Customer.C_D_ID));
+            searchOrder.append(Order.O_C_ID, customerObject.getInteger(Customer.C_ID));
+
+            Document updateObj = new Document();
+            updateObj.append("$set", customerName);
+
+            orderTable.updateOne(searchOrder, updateObj);
+            i++;
+            if (i % 3000 == 0) {
+                System.out.println((Math.round(((i / 300000.0) * 100))) + "% " + ((System.nanoTime() - time) / 1000000000));
+            }
+        }
+        System.out.println("Added customer name to " + Table.ORDER);
+        pw.println("Added customer name to " + Table.ORDER);
     }
 
     private void combineWarehouseAndDistrict() {
         System.out.println("Combining " + Table.WAREHOUSE + " and " + Table.DISTRICT);
+        pw.println("Combining " + Table.WAREHOUSE + " and " + Table.DISTRICT);
+
         MongoCollection districtTable = database.getCollection(Table.DISTRICT);
         MongoCollection warehouseTable = database.getCollection(Table.WAREHOUSE);
 
@@ -181,42 +278,13 @@ public class TableUpdate {
             warehouseTable.updateOne(warehouse, updateObject);
         }
         System.out.println("Combined " + Table.WAREHOUSE + " and " + Table.DISTRICT);
-    }
-
-    private void addItemNameToOrderLine() {
-        System.out.println("Adding " + Item.I_NAME + " to " + Table.ORDERLINE);
-
-        MongoCollection itemTable = database.getCollection(Table.ITEM);
-        MongoCollection orderLineTable = database.getCollection(Table.ORDERLINE);
-
-        FindIterable findIterable = itemTable.find();
-        findIterable.noCursorTimeout(true);
-        MongoCursor cursor = findIterable.iterator();
-
-        int i = 0;
-        long time = System.nanoTime();
-        while (cursor.hasNext()) {
-            Document itemObject = (Document) cursor.next();
-            Document item = new Document();
-            item.append(OrderLine.OL_I_NAME, itemObject.getString(Item.I_NAME));
-
-            Document searchOrderLine = new Document();
-            searchOrderLine.append(OrderLine.OL_I_ID, itemObject.getInteger(Item.I_ID));
-
-            Document updateObj = new Document();
-            updateObj.append("$set", item);
-
-            orderLineTable.updateMany(searchOrderLine, updateObj);
-            i++;
-            if (i % 1000 == 0) {
-                System.out.println((Math.round(((i / 100000.0) * 100))) + "% " + ((System.nanoTime() - time) / 1000000000));
-            }
-        }
-        System.out.println("Added " + Item.I_NAME + " to " + Table.ORDERLINE);
+        pw.println("Combined " + Table.WAREHOUSE + " and " + Table.DISTRICT);
     }
 
     private void combineStockAndItem() {
         System.out.println("Combining " + Table.STOCK + " and " + Table.ITEM);
+        pw.println("Combining " + Table.STOCK + " and " + Table.ITEM);
+
         MongoCollection stockTable = database.getCollection(Table.STOCK);
         MongoCollection itemTable = database.getCollection(Table.ITEM);
 
@@ -247,10 +315,13 @@ public class TableUpdate {
         }
 
         System.out.println("Combined " + Table.STOCK + " and " + Table.ITEM);
+        pw.println("Combined " + Table.STOCK + " and " + Table.ITEM);
     }
 
     private void combineOrderAndOrderLine() {
         System.out.println("Combining " + Table.ORDER + " and " + Table.ORDERLINE);
+        pw.println("Combining " + Table.ORDER + " and " + Table.ORDERLINE);
+
         MongoCollection orderTable = database.getCollection(Table.ORDER);
         MongoCollection orderLineTable = database.getCollection(Table.ORDERLINE);
 
@@ -290,5 +361,6 @@ public class TableUpdate {
             }
         }
         System.out.println("Combined " + Table.ORDER + " and " + Table.ORDERLINE);
+        pw.println("Combined " + Table.ORDER + " and " + Table.ORDERLINE);
     }
 }
