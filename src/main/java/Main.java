@@ -48,7 +48,7 @@ public class Main {
             }
         }
 
-        outputPerformanceResults(statisticsMap);
+        outputPerformanceResults(statisticsMap, consistencyLevel, numTransactions);
         System.out.println("\nAll " + numTransactions + " clients have completed their transactions.");
     }
 
@@ -89,14 +89,19 @@ public class Main {
         return configData;
     }
 
-    private static void outputPerformanceResults(Map<Integer, ClientStatistics> statisticsMap) {
+    private static void outputPerformanceResults(Map<Integer, ClientStatistics> statisticsMap,
+                                                 String consistencyLevel, int numTransactions) {
         int numClients = statisticsMap.size();
-        String outputPath = Constant.PERFORMANCE_OUTPUT_PATH;
+        String outputPath = Constant.getPerformanceOutputPath(consistencyLevel, numTransactions);
 
         try {
             PrintWriter out = new PrintWriter(outputPath);
-            ClientStatistics min = statisticsMap.get(0);
-            ClientStatistics max = statisticsMap.get(0);
+            out.println("Consistency level: " + consistencyLevel);
+            out.println("Number of clients: " + numTransactions);
+            out.println();
+            ClientStatistics min = statisticsMap.get(1);
+            ClientStatistics max = statisticsMap.get(1);
+
             double totalThroughput = 0;
             for (ClientStatistics current : statisticsMap.values()) {
                 double currentThroughput = current.getThroughput();
@@ -109,9 +114,8 @@ public class Main {
             }
 
             // Output statistics of each client:
-            for (int i = 0; i < numClients; i++) {
+            for (int i = 1; i <= numClients; i++) {
                 ClientStatistics stats = statisticsMap.get(i);
-                int index = i + 1;
                 long totalTransactionCount = stats.getTotalTransactionCount();
                 double totalExecutionTime = (double) stats.getTotalExecutionTime() / 1000000000;
                 double throughput = stats.getThroughput();
@@ -137,7 +141,7 @@ public class Main {
                 double topBalanceExecutionTime = (double) executionTimeStats[6] / 1000000000;
                 double relatedCustomerExecutionTime = (double) executionTimeStats[7] / 1000000000;
 
-                out.println("Performance measure for client with index: " + index);
+                out.println("Performance measure for client with index: " + i);
                 out.println("Total Number of Executed Transactions: " + totalTransactionCount);
                 out.println("Total Execution Time: " + totalExecutionTime);
                 out.println("Transaction throughput: " + throughput);
@@ -158,10 +162,10 @@ public class Main {
             out.println();
 
             // Output minimum, maximum and average throughput
-            out.println("Minimum transaction throughput is the client with index " + (min.getIndex() + 1)
+            out.println("Minimum transaction throughput is the client with index " + (min.getIndex())
                     + " with throughput: " + min.getThroughput());
-            out.println("Minimum transaction throughput is the client with index " + (min.getIndex() + 1)
-                    + " with throughput: " + min.getThroughput());
+            out.println("Maximum transaction throughput is the client with index " + (max.getIndex())
+                    + " with throughput: " + max.getThroughput());
             out.println("Average transaction throughput is: " + (totalThroughput / numClients));
 
             out.close();

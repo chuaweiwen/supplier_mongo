@@ -17,10 +17,14 @@ public class Constant {
     static final String NUMBER_OF_TRANSACTIONS_KEY = "NUMBER_OF_TRANSACTIONS";
 
     static final String CONFIGURATION_FILE = "config.env";
-    static final String PERFORMANCE_OUTPUT_PATH = "performance_output.txt";
+    static final String PERFORMANCE_OUTPUT_PATH_WITHOUT_EXTENSION = "performance_output";
 
     static String getTransactionFileLocation(int fileNameWithoutExtension) {
         return "xact/" + fileNameWithoutExtension + ".txt";
+    }
+
+    static String getPerformanceOutputPath(String consistencyLevel, int numTransactions) {
+        return PERFORMANCE_OUTPUT_PATH_WITHOUT_EXTENSION + "_" + consistencyLevel + "_" + numTransactions + ".txt";
     }
 }
 
