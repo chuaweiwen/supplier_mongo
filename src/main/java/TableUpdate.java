@@ -57,6 +57,7 @@ public class TableUpdate {
         updateCustomerLastOrder();
         combineWarehouseAndDistrict();
         addItemNameToOrderLine();
+        combineStockAndItem();
         combineOrderAndOrderLine();
     }
 
@@ -85,6 +86,9 @@ public class TableUpdate {
         database.getCollection(Table.ORDER).createIndex(new Document(Order.O_W_ID,1));
         database.getCollection(Table.ORDER).createIndex(new Document(Order.O_D_ID,1));
         database.getCollection(Table.ORDER).createIndex(new Document(Order.O_ID,1));
+
+        System.out.println("Creating index for " + Table.ITEM);
+        database.getCollection(Table.ITEM).createIndex(new Document(Item.I_ID,1));
 
         System.out.println("Creating index for " + Table.STOCK);
         database.getCollection(Table.STOCK).createIndex(new Document(Stock.S_W_ID,1).append(Stock.S_I_ID,1));
@@ -211,6 +215,40 @@ public class TableUpdate {
         System.out.println("Added " + Item.I_NAME + " to " + Table.ORDERLINE);
     }
 
+    private void combineStockAndItem() {
+        System.out.println("Combining " + Table.STOCK + " and " + Table.ITEM);
+        MongoCollection stockTable = database.getCollection(Table.STOCK);
+        MongoCollection itemTable = database.getCollection(Table.ITEM);
+
+        FindIterable findIterable = itemTable.find();
+        findIterable.noCursorTimeout(true);
+        MongoCursor cursor = findIterable.iterator();
+        int i = 0;
+        long time = System.nanoTime();
+        while (cursor.hasNext()) {
+            Document itemObject = (Document) cursor.next();
+            Document item = new Document();
+            item.append(Stock.S_I_NAME, itemObject.getString(Item.I_NAME));
+            item.append(Stock.S_I_PRICE, itemObject.getDouble(Item.I_PRICE));
+            item.append(Stock.S_I_IM_ID, itemObject.getInteger(Item.I_IM_ID));
+            item.append(Stock.S_I_DATA, itemObject.getString(Item.I_DATA));
+
+            Document searchStock = new Document();
+            searchStock.append(Stock.S_I_ID, itemObject.getInteger(Item.I_ID));
+
+            Document updateObj = new Document();
+            updateObj.append("$set", item);
+
+            stockTable.updateMany(searchStock, updateObj);
+            i++;
+            if (i % 1000 == 0) {
+                System.out.println((Math.round(((i / 100000.0) * 100))) + "% " + ((System.nanoTime() - time) / 1000000000));
+            }
+        }
+
+        System.out.println("Combined " + Table.STOCK + " and " + Table.ITEM);
+    }
+
     private void combineOrderAndOrderLine() {
         System.out.println("Combining " + Table.ORDER + " and " + Table.ORDERLINE);
         MongoCollection orderTable = database.getCollection(Table.ORDER);
@@ -243,7 +281,7 @@ public class TableUpdate {
             searchOrder.put(Order.O_ID, orderLineObject.getInteger(OrderLine.OL_O_ID));
 
             Document updateObj = new Document();
-            updateObj.put("$push", new Document(Table.ORDERLINE,orderLine));
+            updateObj.put("$push", new Document(Order.O_ORDERLINES,orderLine));
 
             orderTable.updateOne(searchOrder, updateObj);
             i++;
