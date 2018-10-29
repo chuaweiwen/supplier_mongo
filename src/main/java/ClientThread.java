@@ -177,7 +177,7 @@ public class ClientThread implements Callable<ClientStatistics> {
     private void updateTransactionDetail(int index, long endTime, long[] executionTime,
                                          long[] transactionCount) {
         executionTime[index] = executionTime[index] + endTime;
-        transactionCount[index] = transactionCount[index]++;
+        transactionCount[index]++;
     }
 
     @Override
