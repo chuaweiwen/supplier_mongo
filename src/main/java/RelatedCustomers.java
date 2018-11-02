@@ -1,8 +1,5 @@
 package main.java;
 
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Projections.elemMatch;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -17,7 +14,6 @@ public class RelatedCustomers {
     private MongoDatabase database;
     private static String ORDER_TABLE = main.java.Table.ORDER;
 
-
     RelatedCustomers(MongoDatabase database) {
         this.database = database;
     }
@@ -26,6 +22,7 @@ public class RelatedCustomers {
         MongoCollection<Document> ordersTable = database.getCollection(ORDER_TABLE);
         HashMap <String,Integer> customerWithItem;
         HashMap<String,ArrayList<Integer>> keyToCust;
+        HashMap<Integer,MongoCursor<Document>> storedIntermeResults = new HashMap<>();
         //Get all the orders from the main customer
         Document ordersSearchQuery = new Document();
         ordersSearchQuery.append(main.java.Order.O_W_ID, w_id);
@@ -39,15 +36,20 @@ public class RelatedCustomers {
             Document orderDocument = orderCursor.next();
             ArrayList<Document> orderLineDocument = (ArrayList<Document>) orderDocument.get(main.java.Order.O_ORDERLINES);
             Iterator<Document> orderLineItor = orderLineDocument.iterator();
-
+            MongoCursor<Document> sameItemOrder;
             while(orderLineItor.hasNext()) { //go thru the orderlines for each item
                 Document orderLineObject = orderLineItor.next();
                 int ol_i_id = orderLineObject.getInteger(main.java.OrderLine.OL_I_ID); //get the item id which is distinct
-
-                Document sameItemSearchQuery = new Document();
-                sameItemSearchQuery.append(main.java.Order.O_W_ID, new Document("$ne", w_id));
-                sameItemSearchQuery.append(main.java.Order.O_ORDERLINES+"."+ main.java.OrderLine.OL_I_ID, new Document("$eq", ol_i_id));
-                MongoCursor<Document> sameItemOrder = ordersTable.find(sameItemSearchQuery).iterator();
+                if(storedIntermeResults.containsKey(ol_i_id)) {
+                    sameItemOrder = storedIntermeResults.get(ol_i_id);
+                }
+                else {
+                    Document sameItemSearchQuery = new Document();
+                    //sameItemSearchQuery.append(main.java.Order.O_W_ID, new Document("$ne", w_id));
+                    sameItemSearchQuery.append(main.java.Order.O_ORDERLINES+"."+ main.java.OrderLine.OL_I_ID, new Document("$eq", ol_i_id));
+                    sameItemOrder = ordersTable.find(sameItemSearchQuery).iterator();
+                    storedIntermeResults.put(ol_i_id,sameItemOrder);
+                }
                 //System.out.println("item id: "+ol_i_id);
                 while(sameItemOrder.hasNext()) {
                     Document sameItemObj = sameItemOrder.next();
