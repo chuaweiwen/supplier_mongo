@@ -62,7 +62,7 @@ class PaymentTransaction {
 
         Document carrier = new Document();
         Document set = new Document("$set", carrier);
-        carrier.put("c_balance", targetCustomer.getDouble("c_balance") + payment);
+        carrier.put("c_balance", targetCustomer.getDouble("c_balance") - payment);
         carrier.put("c_ytd_payment", targetCustomer.getDouble("c_ytd_payment") + payment);
         carrier.put("c_payment_cnt", targetCustomer.getInteger("c_payment_cnt") + 1);
 
@@ -97,7 +97,7 @@ class PaymentTransaction {
                 targetCustomer.get("c_credit"),
                 targetCustomer.get("c_credit_lim"),
                 targetCustomer.get("c_discount"),
-                (targetCustomer.getDouble("c_balance") + payment)));
+                (targetCustomer.getDouble("c_balance") - payment)));
     }
 
     // increase D_YTD by PAYMENT
