@@ -10,7 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import javax.print.Doc;
 
 class DeliveryTransaction {
     private MongoDatabase database;
@@ -45,8 +44,8 @@ class DeliveryTransaction {
             }
 
             updateOrderCarrierId(order, CARRIER_ID);
-            updateOrderLines(order, currentDate);
-            updateCustomer(order, CARRIER_ID);
+            double sumOlAmount = updateOrderLines(order, currentDate);
+            updateCustomer(order, CARRIER_ID, sumOlAmount);
         }
     }
 
@@ -54,18 +53,13 @@ class DeliveryTransaction {
      * Increment C_BALANCE by sum of OL_AMOUNT for all the items placed in order
      * Increment C_DELIVERY_CNT by 1
      */
-    private void updateCustomer(Document order, int CARRIER_ID) {
-        double totalAmount = 0;
-        for (Document orderLine : (List<Document>) order.get("o_orderlines")) {
-            totalAmount += orderLine.getDouble("ol_amount");
-        }
-
-        MongoCollection<Document> collection = database.getCollection("customer");
+    private void updateCustomer(Document order, int CARRIER_ID, double totalAmount) {
+        MongoCollection<Document> collection = database.getCollection(Table.CUSTOMER);
 
         Document find = new Document();
-        find.put("c_w_id", order.getInteger("o_w_id"));
-        find.put("c_d_id", order.getInteger("o_d_id"));
-        find.put("c_id", order.getInteger("o_c_id"));
+        find.put(Customer.C_W_ID, order.getInteger(Order.O_W_ID));
+        find.put(Customer.C_D_ID, order.getInteger(Order.O_D_ID));
+        find.put(Customer.C_ID, order.getInteger(Order.O_C_ID));
 
         Document customer = collection.find(find).first();
         //System.out.println("initial cust: " + customer);
@@ -88,12 +82,18 @@ class DeliveryTransaction {
     /**
      * Update all the order-lines in order by setting OL_DELIVERY_D to the current date and time
      */
-    private void updateOrderLines(Document order, String OL_DELIVERY_D) {
+    private double updateOrderLines(Document order, String OL_DELIVERY_D) {
         MongoCollection<Document> orderOrderlineCollection = database.getCollection("orders");
+
         // List of Document embedded in the order Document
         List<Document> targetOrderlines = (List<Document>) order.get(Order.O_ORDERLINES);
-        System.out.println(targetOrderlines);
+
+        double totalAmount = 0;
+
         for (Document ol : targetOrderlines) {
+            totalAmount += ol.getDouble("ol_amount");
+
+            //db.orders.update({ o_w_id: 1, o_d_id: 1, o_id: 2107, "o_orderlines.ol_number": 1}, {"$set": {"o_orderlines.$.ol_delivery_d": "testinggg"}} )
             Document targetedOrderline = new Document();
             targetedOrderline.put("o_w_id", order.getInteger("o_w_id"));
             targetedOrderline.put("o_d_id", order.getInteger("o_d_id"));
@@ -105,13 +105,13 @@ class DeliveryTransaction {
             carrier.put(Order.O_ORDERLINES + ".$.ol_delivery_d", OL_DELIVERY_D);
 
             orderOrderlineCollection.updateOne(targetedOrderline, set);
-
-            //db.orders.update({ o_w_id: 1, o_d_id: 1, o_id: 2107, "o_orderlines.ol_number": 1}, {"$set": {"o_orderlines.$.ol_delivery_d": "testinggg"}} )
         }
+
+        //System.out.println("Sum of Order lines amount: " + totalAmount);
+        return totalAmount;
     }
 
     private void updateOrderCarrierId(Document order, int CARRIER_ID) {
-        //System.out.println("Updating oldest order (with null carrier id) carrier id...");
         MongoCollection<Document> orderOrderlinecollection = database.getCollection("orders");
 
         Document carrier = new Document();
@@ -125,7 +125,6 @@ class DeliveryTransaction {
      * Find the smallest order number O_ID for district(W_ID, DISTRICT_NO) with O_CARRIER_ID = null
      */
     private Document selectOldestOrder(int W_ID, int D_ID) {
-        //System.out.println("Selecting Oldest Order...");
         MongoCollection<Document> orderOrderlinecollection = database.getCollection("orders");
 
         Document searchOldestOrderQuery = new Document();
