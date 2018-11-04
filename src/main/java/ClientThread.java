@@ -3,6 +3,7 @@ package main.java;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.PrintWriter;
 import java.util.concurrent.Callable;
 
 public class ClientThread implements Callable<ClientStatistics> {
@@ -30,20 +31,25 @@ public class ClientThread implements Callable<ClientStatistics> {
     }
 
     private ClientStatistics readTransaction() {
-        File file = new File(Constant.getTransactionFileLocation(index+1));
+        File file = new File(Constant.getTransactionFileLocation(index));
         Transaction transaction = new Transaction(this.consistencyLevel, this.host, this.port, this.database);
         long[] transactionCount = new long[8];
         long[] executionTime = new long[8];
+        //int i = 0;
+        //int errorCount = 0;
 
         long startTime;
         try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             String input = reader.readLine();
+            //PrintWriter printError = new PrintWriter("xact_" + index + ".txt");
 
             while (input != null && input.length() > 0) {
                 String[] arguments = input.split(",");
+                //i++;
 
                 if (input.charAt(0) == XACT_NEW_ORDER) {
+                    //System.out.println(index + " " + XACT_NEW_ORDER + " " + i);
                     int cId = Integer.parseInt(arguments[1]);
                     int wId = Integer.parseInt(arguments[2]);
                     int dId = Integer.parseInt(arguments[3]);
@@ -70,8 +76,13 @@ public class ClientThread implements Callable<ClientStatistics> {
                         updateTransactionDetail(0, endTime, executionTime, transactionCount);
                     } catch (Exception e) {
                         System.err.println(e.getMessage());
+                        //printError.println(XACT_NEW_ORDER + " " + i);
+                        //printError.println(e.getMessage());
+                        //printError.println();
+                        //errorCount++;
                     }
                 } else if (input.charAt(0) == XACT_PAYMENT) {
+                    //System.out.println(index + " " + XACT_PAYMENT + " " + i);
                     int wId = Integer.parseInt(arguments[1]);
                     int dId = Integer.parseInt(arguments[2]);
                     int cId = Integer.parseInt(arguments[3]);
@@ -84,8 +95,13 @@ public class ClientThread implements Callable<ClientStatistics> {
                         updateTransactionDetail(1, endTime, executionTime, transactionCount);
                     } catch (Exception e) {
                         System.err.println(e.getMessage());
+                        //printError.println(XACT_PAYMENT + " " + i);
+                        //printError.println(e.getMessage());
+                        //printError.println();
+                        //errorCount++;
                     }
                 } else if (input.charAt(0) == XACT_DELIVERY) {
+                    //System.out.println(index + " " + XACT_DELIVERY + " " + i);
                     int wId = Integer.parseInt(arguments[1]);
                     int carrierId = Integer.parseInt(arguments[2]);
 
@@ -96,8 +112,13 @@ public class ClientThread implements Callable<ClientStatistics> {
                         updateTransactionDetail(2, endTime, executionTime, transactionCount);
                     } catch (Exception e) {
                         System.err.println(e.getMessage());
+                        //printError.println(XACT_DELIVERY + " " + i);
+                        //printError.println(e.getMessage());
+                        //printError.println();
+                        //errorCount++;
                     }
                 } else if (input.charAt(0) == XACT_ORDER_STATUS) { // Order Status
+                    //System.out.println(index + " " + XACT_ORDER_STATUS + " " + i);
                     int wId = Integer.parseInt(arguments[1]);
                     int dId = Integer.parseInt(arguments[2]);
                     int cId = Integer.parseInt(arguments[3]);
@@ -109,8 +130,13 @@ public class ClientThread implements Callable<ClientStatistics> {
                         updateTransactionDetail(3, endTime, executionTime, transactionCount);
                     } catch (Exception e) {
                         System.err.println(e.getMessage());
+                        //printError.println(XACT_ORDER_STATUS + " " + i);
+                        //printError.println(e.getMessage());
+                        //printError.println();
+                        //errorCount++;
                     }
                 } else if (input.charAt(0) == XACT_STOCK_LEVEL) { // Stock Level
+                    //System.out.println(index + " " + XACT_STOCK_LEVEL + " " + i);
                     int wId = Integer.parseInt(arguments[1]);
                     int dId = Integer.parseInt(arguments[2]);
                     int T = Integer.parseInt(arguments[3]);
@@ -123,8 +149,13 @@ public class ClientThread implements Callable<ClientStatistics> {
                         updateTransactionDetail(4, endTime, executionTime, transactionCount);
                     } catch (Exception e) {
                         System.err.println(e.getMessage());
+                        //printError.println(XACT_STOCK_LEVEL + " " + i);
+                        //printError.println(e.getMessage());
+                        //printError.println();
+                        //errorCount++;
                     }
                 } else if (input.charAt(0) == XACT_POPULAR_ITEM) { // Popular item
+                    //System.out.println(index + " " + XACT_POPULAR_ITEM + " " + i);
                     int wId = Integer.parseInt(arguments[1]);
                     int dId = Integer.parseInt(arguments[2]);
                     int L = Integer.parseInt(arguments[3]);
@@ -136,8 +167,13 @@ public class ClientThread implements Callable<ClientStatistics> {
                         updateTransactionDetail(5, endTime, executionTime, transactionCount);
                     } catch (Exception e) {
                         System.err.println(e.getMessage());
+                        //printError.println(XACT_POPULAR_ITEM + " " + i);
+                        //printError.println(e.getMessage());
+                        //printError.println();
+                        //errorCount++;
                     }
                 } else if (input.charAt(0) == XACT_TOP_BALANCE) { // Top-Balance
+                    //System.out.println(index + " " + XACT_TOP_BALANCE + " " + i);
                     try {
                         startTime = System.nanoTime();
                         transaction.processTopBalance();
@@ -145,8 +181,13 @@ public class ClientThread implements Callable<ClientStatistics> {
                         updateTransactionDetail(6, endTime, executionTime, transactionCount);
                     } catch (Exception e) {
                         System.err.println(e.getMessage());
+                        //printError.println(XACT_TOP_BALANCE + " " + i);
+                        //printError.println(e.getMessage());
+                        //printError.println();
+                        //errorCount++;
                     }
                 } else if (input.charAt(0) == XACT_RELATED_CUSTOMER) {
+                    //System.out.println(index + " " + XACT_RELATED_CUSTOMER + " " + i);
                     int wId = Integer.parseInt(arguments[1]);
                     int dId = Integer.parseInt(arguments[2]);
                     int cId = Integer.parseInt(arguments[3]);
@@ -158,14 +199,19 @@ public class ClientThread implements Callable<ClientStatistics> {
                         updateTransactionDetail(7, endTime, executionTime, transactionCount);
                     } catch (Exception e) {
                         System.err.println(e.getMessage());
+                        //printError.println(XACT_RELATED_CUSTOMER + " " + i);
+                        //printError.println(e.getMessage());
+                        //printError.println();
+                        //errorCount++;
                     }
                 } else {
                     System.err.println("\n\nOops, the application encountered an error in reading file.\n\n");
                 }
-                System.out.println();
+                //System.out.println();
                 input = reader.readLine();
             }
-
+            //printError.println("Total errors: " + errorCount);
+            //printError.close();
             reader.close();
         } catch (Exception e) {
             e.printStackTrace();
