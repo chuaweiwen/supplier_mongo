@@ -86,14 +86,14 @@ public class RelatedCustomerTransaction {
             int o_id = keyToCust.get(pair.getKey()).get(2);
 
             Document ordersSearchQuery = new Document();
-            ordersSearchQuery.append(main.java.Order.O_W_ID, w_id);
-            ordersSearchQuery.append(main.java.Order.O_D_ID, d_id);
-            ordersSearchQuery.append(main.java.Order.O_ID, o_id);
+            ordersSearchQuery.append(Order.O_W_ID, w_id);
+            ordersSearchQuery.append(Order.O_D_ID, d_id);
+            ordersSearchQuery.append(Order.O_ID, o_id);
 
             Document orderCursor = ordersTable.find(ordersSearchQuery).first();
 
-            if(wid!=keyToCust.get(pair.getKey()).get(0) && did!=keyToCust.get(pair.getKey()).get(1) && cid!=orderCursor.getInteger("o_c_id"))
-                System.out.println("cus_id: "+orderCursor.getInteger("o_c_id")+" district_id: "+keyToCust.get(pair.getKey()).get(1)+" warehouse_id: "+keyToCust.get(pair.getKey()).get(0));
+            if(wid!=keyToCust.get(pair.getKey()).get(0) && did!=keyToCust.get(pair.getKey()).get(1) && cid!=orderCursor.getInteger(Order.O_C_ID))
+                System.out.println("cus_id: "+orderCursor.getInteger(Order.O_C_ID)+" district_id: "+keyToCust.get(pair.getKey()).get(1)+" warehouse_id: "+keyToCust.get(pair.getKey()).get(0));
             it.remove(); // avoids a ConcurrentModificationException
         }
     }

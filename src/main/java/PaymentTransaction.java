@@ -54,17 +54,17 @@ class PaymentTransaction {
     private void updateCustomer(int wId, int dId, int cId, double payment) {
 
         Document searchCustomerQuery = new Document();
-        searchCustomerQuery.append("c_w_id", wId);
-        searchCustomerQuery.append("c_d_id", dId);
-        searchCustomerQuery.append("c_id", cId);
+        searchCustomerQuery.append(Customer.C_W_ID, wId);
+        searchCustomerQuery.append(Customer.C_D_ID, dId);
+        searchCustomerQuery.append(Customer.C_ID, cId);
 
         Document targetCustomer = this.customerCollection.find(searchCustomerQuery).first();
 
         Document carrier = new Document();
         Document set = new Document("$set", carrier);
-        carrier.put("c_balance", targetCustomer.getDouble("c_balance") - payment);
-        carrier.put("c_ytd_payment", targetCustomer.getDouble("c_ytd_payment") + payment);
-        carrier.put("c_payment_cnt", targetCustomer.getInteger("c_payment_cnt") + 1);
+        carrier.put(Customer.C_BALANCE, targetCustomer.getDouble(Customer.C_BALANCE) - payment);
+        carrier.put(Customer.C_YTD_PAYMENT, targetCustomer.getDouble(Customer.C_YTD_PAYMENT) + payment);
+        carrier.put(Customer.C_PAYMENT_CNT, targetCustomer.getInteger(Customer.C_PAYMENT_CNT) + 1);
 
         customerCollection.updateOne(searchCustomerQuery, set);
         /*
@@ -77,27 +77,27 @@ class PaymentTransaction {
 
     private void outputUpdateCustomer(Document targetCustomer, double payment) {
         System.out.println(String.format(MESSAGE_CUSTOMER,
-                targetCustomer.get("c_w_id"),
-                targetCustomer.get("c_d_id"),
-                targetCustomer.get("c_id"),
+                targetCustomer.get(Customer.C_W_ID),
+                targetCustomer.get(Customer.C_D_ID),
+                targetCustomer.get(Customer.C_ID),
 
-                targetCustomer.get("c_first"),
-                targetCustomer.get("c_middle"),
-                targetCustomer.get("c_last"),
+                targetCustomer.get(Customer.C_FIRST),
+                targetCustomer.get(Customer.C_MIDDLE),
+                targetCustomer.get(Customer.C_LAST),
 
-                targetCustomer.get("c_street_1"),
-                targetCustomer.get("c_street_2"),
-                targetCustomer.get("c_city"),
-                targetCustomer.get("c_state"),
-                targetCustomer.get("c_zip"),
+                targetCustomer.get(Customer.C_STREET_1),
+                targetCustomer.get(Customer.C_STREET_2),
+                targetCustomer.get(Customer.C_CITY),
+                targetCustomer.get(Customer.C_STATE),
+                targetCustomer.get(Customer.C_ZIP),
 
-                targetCustomer.get("c_phone"),
-                targetCustomer.get("c_since"),
+                targetCustomer.get(Customer.C_PHONE),
+                targetCustomer.get(Customer.C_SINCE),
 
-                targetCustomer.get("c_credit"),
-                targetCustomer.get("c_credit_lim"),
-                targetCustomer.get("c_discount"),
-                (targetCustomer.getDouble("c_balance") - payment)));
+                targetCustomer.get(Customer.C_CREDIT),
+                targetCustomer.get(Customer.C_CREDIT_LIM),
+                targetCustomer.get(Customer.C_DISCOUNT),
+                (targetCustomer.getDouble(Customer.C_BALANCE) - payment)));
     }
 
     // increase D_YTD by PAYMENT
@@ -105,15 +105,15 @@ class PaymentTransaction {
         //System.out.println("updating D_YTD...");
 
         Document searchWarehouseDistrictQuery = new Document();
-        searchWarehouseDistrictQuery.append("w_id", wId);
+        searchWarehouseDistrictQuery.append(Warehouse.W_ID, wId);
 
         Document warehouse = warehouseDistrictCollection.find(searchWarehouseDistrictQuery).first();
         //System.out.println(warehouse + "\n");
         Document district = null;
-        List<Document> districts = (List<Document>) warehouse.get("w_districts");
+        List<Document> districts = (List<Document>) warehouse.get(Warehouse.W_DISTRICTS);
 
         for (Document eachDistrict : districts) {
-            if (eachDistrict.getInteger("d_id") == dId) {
+            if (eachDistrict.getInteger(District.D_ID) == dId) {
                 district = eachDistrict;
                 break;
             }
@@ -122,8 +122,8 @@ class PaymentTransaction {
         //System.out.println("District before update: "  + district);
 
         Document carrier = new Document();
-        carrier.put("w_districts.$.d_ytd", district.getDouble("d_ytd") + payment);
-        searchWarehouseDistrictQuery.put("w_districts.d_id", dId);
+        carrier.put(Warehouse.W_DISTRICTS + ".$." + District.D_YTD, district.getDouble(District.D_YTD) + payment);
+        searchWarehouseDistrictQuery.put(Warehouse.W_DISTRICTS + "." + District.D_ID, dId);
         Document set = new Document("$set", carrier);
 
         warehouseDistrictCollection.updateOne(searchWarehouseDistrictQuery, set);
@@ -135,11 +135,11 @@ class PaymentTransaction {
 
     private void outputUpdateDistrict(Document district) {
         System.out.println(String.format(MESSAGE_DISTRICT,
-                district.get("d_street_1"),
-                district.get("d_street_2"),
-                district.get("d_city"),
-                district.get("d_state"),
-                district.get("d_zip")));
+                district.get(District.D_STREET_1),
+                district.get(District.D_STREET_2),
+                district.get(District.D_CITY),
+                district.get(District.D_STATE),
+                district.get(District.D_ZIP)));
     }
 
     // increase W_YTD by PAYMENT
@@ -147,13 +147,13 @@ class PaymentTransaction {
         //System.out.println("updating W_YTD...");
 
         Document find = new Document();
-        find.append("w_id", wId);
+        find.append(Warehouse.W_ID, wId);
 
         Document warehouse = warehouseDistrictCollection.find(find).first();
 
         Document carrier = new Document();
         Document set = new Document("$set", carrier);
-        carrier.put("w_ytd", warehouse.getDouble("w_ytd") + payment);
+        carrier.put(Warehouse.W_YTD, warehouse.getDouble(Warehouse.W_YTD) + payment);
 
         warehouseDistrictCollection.updateOne(find, set);
 
@@ -163,10 +163,10 @@ class PaymentTransaction {
 
     private void outputUpdateWarehouse(Document warehouse) {
         System.out.println(String.format(MESSAGE_WAREHOUSE,
-                warehouse.get("w_street_1"),
-                warehouse.get("w_street_2"),
-                warehouse.get("w_city"),
-                warehouse.get("w_state"),
-                warehouse.get("w_zip")));
+                warehouse.get(Warehouse.W_STREET_1),
+                warehouse.get(Warehouse.W_STREET_2),
+                warehouse.get(Warehouse.W_CITY),
+                warehouse.get(Warehouse.W_STATE),
+                warehouse.get(Warehouse.W_ZIP)));
     }
 }

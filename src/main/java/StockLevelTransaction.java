@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Set;
 
 class StockLevelTransaction {
-    private static String STOCK_TABLE ="stock";
-    private static String ORDER_ORDERLINE ="orders";
-    private static String WAREHOUSE_DISTRICT ="warehouse";
+    private static String STOCK_TABLE = Table.STOCK;
+    private static String ORDER_ORDERLINE = Table.ORDER;
+    private static String WAREHOUSE_DISTRICT = Table.WAREHOUSE;
 
     private MongoDatabase database;
 
@@ -54,32 +54,32 @@ class StockLevelTransaction {
         */
 
         // 1. Let N denote the value of the next available order number D NEXT O ID for district (W ID,D ID)
-        Document targetWarehouse = warehouseDistrictCollection.find(eq("w_id", W_ID)).first();
+        Document targetWarehouse = warehouseDistrictCollection.find(eq(Warehouse.W_ID, W_ID)).first();
         List<Document> districts = (List<Document>) targetWarehouse.get("w_districts");
         Document targetDistrict = districts.get(D_ID-1);
-        D_NEXT_O_ID = targetDistrict.getInteger("d_next_o_id");
+        D_NEXT_O_ID = targetDistrict.getInteger(District.D_NEXT_O_ID);
 
         // 2. Let S denote the set of items from the last L orders for district (W ID,D ID); i.e.,
         for (int i = (D_NEXT_O_ID + 1 - L); i < D_NEXT_O_ID; i++) {
             BasicDBObject orderOrderlineSearchQuery = new BasicDBObject();
-            orderOrderlineSearchQuery.append("o_w_id", W_ID);
-            orderOrderlineSearchQuery.append("o_d_id", D_ID);
-            orderOrderlineSearchQuery.append("o_id", i);
+            orderOrderlineSearchQuery.append(Order.O_W_ID, W_ID);
+            orderOrderlineSearchQuery.append(Order.O_D_ID, D_ID);
+            orderOrderlineSearchQuery.append(Order.O_ID, i);
 
             Document targetOrderOrderline = orderOrderLineCollection.find(orderOrderlineSearchQuery).first();
-            List<Document> targetOrderlines = (List<Document>) targetOrderOrderline.get("o_orderlines");
+            List<Document> targetOrderlines = (List<Document>) targetOrderOrderline.get(Order.O_ORDERLINES);
 
             for (Document eachOrderline : targetOrderlines) {
-                int OL_I_ID = eachOrderline.getInteger("ol_i_id");
+                int OL_I_ID = eachOrderline.getInteger(OrderLine.OL_I_ID);
 
                 BasicDBObject stockSearchQuery = new BasicDBObject();
-                stockSearchQuery.append("s_w_id", W_ID);
-                stockSearchQuery.append("s_i_id", OL_I_ID);
+                stockSearchQuery.append(Stock.S_W_ID, W_ID);
+                stockSearchQuery.append(Stock.S_I_ID, OL_I_ID);
 
                 MongoCursor<Document> stockCursor = stockTableCollection.find(stockSearchQuery).iterator();
                 while (stockCursor.hasNext()) {
                     Document stockDocument = stockCursor.next();
-                    int quantity = stockDocument.getInteger("s_quantity");
+                    int quantity = stockDocument.getInteger(Stock.S_QUANTITY);
                     if(quantity < T) {
                         count++;
                     }
