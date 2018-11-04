@@ -79,8 +79,13 @@ class StockLevelTransaction {
                 MongoCursor<Document> stockCursor = stockTableCollection.find(stockSearchQuery).iterator();
                 while (stockCursor.hasNext()) {
                     Document stockDocument = stockCursor.next();
-                    int quantity = stockDocument.getInteger(Stock.S_QUANTITY);
-                    if(quantity < T) {
+                    double quantity = 0.0;
+                    try {
+                        quantity = stockDocument.getDouble(Stock.S_QUANTITY);
+                    } catch (ClassCastException e) {
+                        quantity = (double) stockDocument.getInteger(Stock.S_QUANTITY);
+                    }
+                    if(quantity < (double) T) {
                         count++;
                     }
                 }
