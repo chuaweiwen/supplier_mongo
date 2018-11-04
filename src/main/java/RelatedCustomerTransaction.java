@@ -10,43 +10,43 @@ import com.mongodb.client.MongoDatabase;
 
 import org.bson.Document;
 
-public class RelatedCustomers {
+public class RelatedCustomerTransaction {
     private MongoDatabase database;
-    private static String ORDER_TABLE = main.java.Table.ORDER;
+    private static String ORDER_TABLE = Table.ORDER;
 
-    RelatedCustomers(MongoDatabase database) {
+    RelatedCustomerTransaction(MongoDatabase database) {
         this.database = database;
     }
 
     void processRelatedCustomer(int w_id,int d_id,int c_id) {
         MongoCollection<Document> ordersTable = database.getCollection(ORDER_TABLE);
-        HashMap <String,Integer> customerWithItem;
+        HashMap<String,Integer> customerWithItem;
         HashMap<String,ArrayList<Integer>> keyToCust;
-        HashMap<Integer,MongoCursor<Document>> storedIntermeResults = new HashMap<>();
+        HashMap<Integer,MongoCursor<Document>> storedIntermeResults = new HashMap<Integer,MongoCursor<Document>>();
         //Get all the orders from the main customer
         Document ordersSearchQuery = new Document();
-        ordersSearchQuery.append(main.java.Order.O_W_ID, w_id);
-        ordersSearchQuery.append(main.java.Order.O_D_ID, d_id);
-        ordersSearchQuery.append(main.java.Order.O_C_ID, c_id);
+        ordersSearchQuery.append(Order.O_W_ID, w_id);
+        ordersSearchQuery.append(Order.O_D_ID, d_id);
+        ordersSearchQuery.append(Order.O_C_ID, c_id);
 
         MongoCursor<Document> orderCursor = ordersTable.find(ordersSearchQuery).iterator();
         while(orderCursor.hasNext()) { //For each order go through all the orderlines and check with the other customers for similar item
-            customerWithItem = new HashMap<>();
-            keyToCust = new HashMap<>();
+            customerWithItem = new HashMap<String,Integer>();
+            keyToCust = new HashMap<String,ArrayList<Integer>>();
             Document orderDocument = orderCursor.next();
-            ArrayList<Document> orderLineDocument = (ArrayList<Document>) orderDocument.get(main.java.Order.O_ORDERLINES);
+            ArrayList<Document> orderLineDocument = (ArrayList<Document>) orderDocument.get(Order.O_ORDERLINES);
             Iterator<Document> orderLineItor = orderLineDocument.iterator();
             MongoCursor<Document> sameItemOrder;
             while(orderLineItor.hasNext()) { //go thru the orderlines for each item
                 Document orderLineObject = orderLineItor.next();
-                int ol_i_id = orderLineObject.getInteger(main.java.OrderLine.OL_I_ID); //get the item id which is distinct
+                int ol_i_id = orderLineObject.getInteger(OrderLine.OL_I_ID); //get the item id which is distinct
                 if(storedIntermeResults.containsKey(ol_i_id)) {
                     sameItemOrder = storedIntermeResults.get(ol_i_id);
                 }
                 else {
                     Document sameItemSearchQuery = new Document();
-                    //sameItemSearchQuery.append(main.java.Order.O_W_ID, new Document("$ne", w_id));
-                    sameItemSearchQuery.append(main.java.Order.O_ORDERLINES+"."+ main.java.OrderLine.OL_I_ID, new Document("$eq", ol_i_id));
+                    //sameItemSearchQuery.append(Order.O_W_ID, new Document("$ne", w_id));
+                    sameItemSearchQuery.append(Order.O_ORDERLINES+"."+ OrderLine.OL_I_ID, new Document("$eq", ol_i_id));
                     sameItemOrder = ordersTable.find(sameItemSearchQuery).iterator();
                     storedIntermeResults.put(ol_i_id,sameItemOrder);
                 }
@@ -55,9 +55,9 @@ public class RelatedCustomers {
                     Document sameItemObj = sameItemOrder.next();
                     //System.out.println(sameItemObj.toJson());
 
-                    int o_w_id = sameItemObj.getInteger(main.java.Order.O_W_ID);
-                    int o_d_id = sameItemObj.getInteger(main.java.Order.O_D_ID);
-                    int o_id = sameItemObj.getInteger(main.java.Order.O_ID);
+                    int o_w_id = sameItemObj.getInteger(Order.O_W_ID);
+                    int o_d_id = sameItemObj.getInteger(Order.O_D_ID);
+                    int o_id = sameItemObj.getInteger(Order.O_ID);
                     String key = "w_id: "+ o_w_id + " d_id: "+ o_d_id + " o_id"+ o_id;
                     ArrayList<Integer> addArrayList = new ArrayList<Integer>();
                     addArrayList.add(0,o_w_id); //index 0 is w_id
