@@ -9,13 +9,13 @@ import com.mongodb.client.MongoDatabase;
 
 public class Transaction {
     private NewOrderTransaction newOrderTransaction;
-    //private PaymentTransaction paymentTransaction;
-    //private DeliveryTransaction deliveryTransaction;
+    private PaymentTransaction paymentTransaction;
+    private DeliveryTransaction deliveryTransaction;
     private OrderStatusTransaction orderStatusTransaction;
-    //private StockLevelTransaction stockLevelTransaction;
-    //private PopularItemTransaction popularItemTransaction;
-    //private TopBalanceTransaction topBalanceTransaction;
-    //private RelatedCustomerTransaction relatedCustomerTransaction;
+    private StockLevelTransaction stockLevelTransaction;
+    private PopularItemTransaction popularItemTransaction;
+    private TopBalanceTransaction topBalanceTransaction;
+    private RelatedCustomerTransaction relatedCustomerTransaction;
 
     public Transaction(String consistencyLevel, String host, int port, String databaseName) {
         MongoClient mongoClient;
@@ -37,13 +37,13 @@ public class Transaction {
         MongoDatabase database = mongoClient.getDatabase(databaseName);
 
         newOrderTransaction = new NewOrderTransaction(database);
-        //paymentTransaction = new PaymentTransaction(database);
-        //deliveryTransaction = new DeliveryTransaction(database);
+        paymentTransaction = new PaymentTransaction(database);
+        deliveryTransaction = new DeliveryTransaction(database);
         orderStatusTransaction = new OrderStatusTransaction(database);
-        //stockLevelTransaction = new StockLevelTransaction(database);
-        //popularItemTransaction = new PopularItemTransaction(database);
-        //topBalanceTransaction = new TopBalanceTransaction(database);
-        //relatedCustomerTransaction = new RelatedCustomerTransaction(database);
+        stockLevelTransaction = new StockLevelTransaction(database);
+        popularItemTransaction = new PopularItemTransaction(database);
+        topBalanceTransaction = new TopBalanceTransaction(database);
+        relatedCustomerTransaction = new RelatedCustomerTransaction(database);
     }
 
     public void processNewOrder(int wId, int dId, int cId, int numItems,
@@ -52,30 +52,30 @@ public class Transaction {
     }
 
     public void processPayment(int wId, int dId, int cId, double payment) {
-        //paymentTransaction.processPaymentTransaction(wId, dId, cId, payment);
+        paymentTransaction.processPaymentTransaction(wId, dId, cId, payment);
     }
 
     public void processDelivery(int wId, int carrierId) {
-        //deliveryTransaction.processDeliveryTransaction(wId, carrierId);
+        deliveryTransaction.processDelivery(wId, carrierId);
     }
 
     public void processOrderStatus(int wId, int dId, int cId) {
         orderStatusTransaction.processOrderStatus(wId, dId, cId);
     }
 
-    public void processStockLevel(int wId, int dId, long T, int L) {
-        //stockLevelTransaction.processStockLevelTransaction(wId, dId, T, L);
+    public void processStockLevel(int wId, int dId, int T, int L) {
+        stockLevelTransaction.processStockLevelTransaction(wId, dId, T, L);
     }
 
     public void processPopularItem(int wId, int dId, int L) {
-        //popularItemTransaction.popularItem(wId, dId, L);
+        popularItemTransaction.processPopularItem(wId, dId, L);
     }
 
     public void processTopBalance() {
-        //topBalanceTransaction.calTopBalance();
+        topBalanceTransaction.processTopBalance();
     }
 
     public void processRelatedCustomer(int wId, int dId, int cId) {
-        //relatedCustomerTransaction.relatedCustomer(wId, dId, cId);
+        relatedCustomerTransaction.processRelatedCustomer(wId, dId, cId);
     }
 }

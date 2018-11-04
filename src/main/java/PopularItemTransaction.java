@@ -29,8 +29,8 @@ class PopularItemTransaction {
         //print w_id, d_id, L
         System.out.println("W_ID: " + w_ID + ", D_ID: " + d_ID + ", L: " + L);
 
-        List<HashSet<String>> itemList = new ArrayList<> ();
-        Set<String> popularItems = new HashSet<> ();
+        List<HashSet<String>> itemList = new ArrayList<HashSet<String>>();
+        Set<String> popularItems = new HashSet<String>();
 
         MongoCollection<Document> ordersTable = database.getCollection(ORDER_TABLE);
 
@@ -43,11 +43,9 @@ class PopularItemTransaction {
 
         while (orderCursor.hasNext()) {
 
-
-
             double maxQuantity = 0;
-            HashSet<String> items = new HashSet<>();
-            HashSet<String> maxItems = new HashSet<>();
+            HashSet<String> items = new HashSet<String>();
+            HashSet<String> maxItems = new HashSet<String>();
 
             Document orderDocument = orderCursor.next();
             ArrayList<Document> orderLineDocument = (ArrayList<Document>) orderDocument.get(Order.O_ORDERLINES);

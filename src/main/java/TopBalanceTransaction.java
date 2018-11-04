@@ -6,7 +6,7 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
 class TopBalanceTransaction {
-    private static String CUSTOMERS_TABLE =Table.CUSTOMER;
+    private static String CUSTOMERS_TABLE = Table.CUSTOMER;
 
     private static final String MESSAGE_CUSTOMER =
             "Customer First: %s,  Middle: %s,  Last: %s, Balance: %.2f, Warehouse: %d, District: %d\n"; //

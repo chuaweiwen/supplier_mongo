@@ -118,7 +118,7 @@ public class ClientThread implements Callable<ClientStatistics> {
 
                     try {
                         startTime = System.nanoTime();
-                        transaction.processStockLevel(wId, dId, (long) T, L);
+                        transaction.processStockLevel(wId, dId, T, L);
                         long endTime = System.nanoTime() - startTime;
                         updateTransactionDetail(4, endTime, executionTime, transactionCount);
                     } catch (Exception e) {
