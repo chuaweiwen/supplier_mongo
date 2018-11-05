@@ -35,6 +35,8 @@ public class Main {
         }
 
         Map<Integer, ClientStatistics> statisticsMap = new HashMap<Integer, ClientStatistics>();
+        int numXactError = 0;
+        String errorMessage = "";
         for (Future<ClientStatistics> future : results) {
             try {
                 ClientStatistics statistics = future.get();
@@ -44,12 +46,13 @@ public class Main {
                 return;
             } catch (ExecutionException e) {
                 e.printStackTrace();
-                return;
+                numXactError++;
             }
         }
 
         outputPerformanceResults(statisticsMap, consistencyLevel, numTransactions);
         System.out.println("\nAll " + numTransactions + " clients have completed their transactions.");
+        System.out.println("Number of transactions with error: " + numXactError);
     }
 
     public static String[] readConfigFile() {
@@ -100,7 +103,17 @@ public class Main {
             out.println("Number of clients: " + numTransactions);
             out.println();
             ClientStatistics min = statisticsMap.get(1);
-            ClientStatistics max = statisticsMap.get(1);
+            for (int i = 1; i <= numClients; i++) {
+                min = statisticsMap.get(i);
+                if (min != null)
+                    break;
+            }
+            if (min == null) {
+                out.println("No transactions found");
+                out.close();
+                return;
+            }
+            ClientStatistics max = min;
 
             double totalThroughput = 0;
             for (ClientStatistics current : statisticsMap.values()) {
@@ -116,6 +129,13 @@ public class Main {
             // Output statistics of each client:
             for (int i = 1; i <= numClients; i++) {
                 ClientStatistics stats = statisticsMap.get(i);
+                if (stats == null) {
+                    out.println("Performance measure for client with index: " + i);
+                    out.println("Data unavailable - Runtime error encountered.");
+                    out.println("=========================================");
+                    out.println();
+                    continue;
+                }
                 long totalTransactionCount = stats.getTotalTransactionCount();
                 double totalExecutionTime = (double) stats.getTotalExecutionTime() / 1000000000;
                 double throughput = stats.getThroughput();
