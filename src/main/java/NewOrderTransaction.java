@@ -92,18 +92,19 @@ public class NewOrderTransaction {
             totalAmount += itemAmount;
 
             // Order line
-            Document orderLine = new Document(OrderLine.OL_W_ID, wId)
+            Document modifiedOrderLine = new Document(OrderLine.OL_W_ID, wId)
                     .append(OrderLine.OL_D_ID, dId)
                     .append(OrderLine.OL_O_ID, nextOId)
-                    .append(OrderLine.OL_NUMBER, i)
-                    .append(OrderLine.OL_I_ID, iId)
+                    .append(OrderLine.OL_I_ID, iId);
+
+            Document orderLine = modifiedOrderLine.append(OrderLine.OL_NUMBER, i)
                     .append(OrderLine.OL_I_NAME, itemName)
                     .append(OrderLine.OL_AMOUNT, itemAmount)
                     .append(OrderLine.OL_SUPPLY_W_ID, iWId)
                     .append(OrderLine.OL_QUANTITY, quantity)
                     .append(OrderLine.OL_DIST_INFO, stock.getString(Stock.getDistrictStringId(dId)));
             orderLines.add(orderLine);
-            database.getCollection(Table.ORDERLINE).insertOne(orderLine);
+            database.getCollection(Table.ORDERLINE).insertOne(modifiedOrderLine);
 
             itemOutput[i] = "" + (i+1) + "\t" + itemName + "\t" + iWId + " " + quantity +
                     "\t" + itemAmount + "\t" + adjQuantity;
