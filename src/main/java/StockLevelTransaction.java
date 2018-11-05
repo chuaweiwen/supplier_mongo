@@ -43,12 +43,6 @@ class StockLevelTransaction {
         orderOrderLineCollection = database.getCollection(ORDER_ORDERLINE);
         stockTableCollection = database.getCollection(STOCK_TABLE);
 
-        /* Old codes for reference [NOT WORKING]
-        BasicDBObject warehouseDistrictSearchQuery = new BasicDBObject();
-        warehouseDistrictSearchQuery.append("d_w_id", W_ID);
-        warehouseDistrictSearchQuery.append("d_id", D_ID);
-        */
-
         // 1. Let N denote the value of the next available order number D NEXT O ID for district (W ID,D ID)
         Document targetWarehouse = warehouseDistrictCollection.find(eq(Warehouse.W_ID, W_ID)).first();
         List<Document> districts = (List<Document>) targetWarehouse.get(Warehouse.W_DISTRICTS);
@@ -78,30 +72,30 @@ class StockLevelTransaction {
 
                 Document targetOrderOrderline = orderOrderLineCollection.find(orderOrderlineSearchQuery).first();
                 if (targetOrderOrderline == null) {
-                    System.out.println("Oops, no such O_ID - D_NEXT_O_ID: " + D_NEXT_O_ID + ", O_ID: " + i);
-                }
+                    System.out.println("Oops, no such order - " + "O_ID: " + i);
+                } else {
+                    List<Document> targetOrderlines = (List<Document>) targetOrderOrderline.get(Order.O_ORDERLINES);
 
-                List<Document> targetOrderlines = (List<Document>) targetOrderOrderline.get(Order.O_ORDERLINES);
+                    for (Document eachOrderline : targetOrderlines) {
+                        int OL_I_ID = eachOrderline.getInteger(OrderLine.OL_I_ID);
 
-                for (Document eachOrderline : targetOrderlines) {
-                    int OL_I_ID = eachOrderline.getInteger(OrderLine.OL_I_ID);
+                        Document stockSearchQuery = new Document();
+                        stockSearchQuery.append(Stock.S_W_ID, W_ID);
+                        stockSearchQuery.append(Stock.S_I_ID, OL_I_ID);
 
-                    Document stockSearchQuery = new Document();
-                    stockSearchQuery.append(Stock.S_W_ID, W_ID);
-                    stockSearchQuery.append(Stock.S_I_ID, OL_I_ID);
-
-                    // 3. Output the total number of items in S where its stock quantity at W ID is below the threshold;
-                    MongoCursor<Document> stockCursor = stockTableCollection.find(stockSearchQuery).iterator();
-                    while (stockCursor.hasNext()) {
-                        Document stockDocument = stockCursor.next();
-                        double quantity = 0.0;
-                        try {
-                            quantity = stockDocument.getDouble(Stock.S_QUANTITY);
-                        } catch (ClassCastException e) {
-                            quantity = (double) stockDocument.getInteger(Stock.S_QUANTITY);
-                        }
-                        if (quantity < (double) T) {
-                            count++;
+                        // 3. Output the total number of items in S where its stock quantity at W ID is below the threshold;
+                        MongoCursor<Document> stockCursor = stockTableCollection.find(stockSearchQuery).iterator();
+                        while (stockCursor.hasNext()) {
+                            Document stockDocument = stockCursor.next();
+                            double quantity = 0.0;
+                            try {
+                                quantity = stockDocument.getDouble(Stock.S_QUANTITY);
+                            } catch (ClassCastException e) {
+                                quantity = (double) stockDocument.getInteger(Stock.S_QUANTITY);
+                            }
+                            if (quantity < (double) T) {
+                                count++;
+                            }
                         }
                     }
                 }
