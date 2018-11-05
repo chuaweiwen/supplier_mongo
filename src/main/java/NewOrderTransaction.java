@@ -61,7 +61,6 @@ public class NewOrderTransaction {
                 break;
             }
         }
-        updateCustomerLastOrder(nextOId, wId, dId, cId, currentDate);
 
         double totalAmount= 0;
         List<Document> orderLines = new ArrayList<Document>();
@@ -121,7 +120,8 @@ public class NewOrderTransaction {
                         .append(Order.O_C_MIDDLE, customer.getString(Customer.C_MIDDLE))
                         .append(Order.O_C_LAST, customer.getString(Customer.C_LAST))
                         .append(Order.O_ORDERLINES, orderLines));
-
+        updateCustomerLastOrder(nextOId, wId, dId, cId, currentDate);
+        
         /**
          * Outputs the necessary data
          */
