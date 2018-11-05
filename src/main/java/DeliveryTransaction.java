@@ -66,11 +66,11 @@ class DeliveryTransaction {
 
         Document carrier = new Document();
         Document set = new Document("$set", carrier);
-        carrier.put("c_balance", customer.getDouble("c_balance") + totalAmount);
-        carrier.put("c_delivery_cnt", customer.getInteger("c_delivery_cnt") + 1);
+        carrier.put(Customer.C_BALANCE, customer.getDouble(Customer.C_BALANCE) + totalAmount);
+        carrier.put(Customer.C_DELIVERY_CNT, customer.getInteger(Customer.C_DELIVERY_CNT) + 1);
 
-        int C_LAST_O_ID = customer.getInteger("c_last_o_id");
-        if (C_LAST_O_ID == order.getInteger("o_id")) {
+        int C_LAST_O_ID = customer.getInteger(Customer.C_LAST_O_ID);
+        if (C_LAST_O_ID == order.getInteger(Order.O_ID)) {
             carrier.put(Customer.C_LAST_O_CARRIER_ID, CARRIER_ID);
             System.out.println("Update C_LAST_O_CARRIER_ID : " + C_LAST_O_ID + " " + CARRIER_ID);
         }
@@ -83,7 +83,7 @@ class DeliveryTransaction {
      * Update all the order-lines in order by setting OL_DELIVERY_D to the current date and time
      */
     private double updateOrderLines(Document order, String OL_DELIVERY_D) {
-        MongoCollection<Document> orderOrderlineCollection = database.getCollection("orders");
+        MongoCollection<Document> orderOrderlineCollection = database.getCollection(Table.ORDER);
 
         // List of Document embedded in the order Document
         List<Document> targetOrderlines = (List<Document>) order.get(Order.O_ORDERLINES);
@@ -91,18 +91,18 @@ class DeliveryTransaction {
         double totalAmount = 0;
 
         for (Document ol : targetOrderlines) {
-            totalAmount += ol.getDouble("ol_amount");
+            totalAmount += ol.getDouble(OrderLine.OL_AMOUNT);
 
             //db.orders.update({ o_w_id: 1, o_d_id: 1, o_id: 2107, "o_orderlines.ol_number": 1}, {"$set": {"o_orderlines.$.ol_delivery_d": "testinggg"}} )
             Document targetedOrderline = new Document();
-            targetedOrderline.put("o_w_id", order.getInteger("o_w_id"));
-            targetedOrderline.put("o_d_id", order.getInteger("o_d_id"));
-            targetedOrderline.put("o_id", order.getInteger("o_id"));
-            targetedOrderline.put(Order.O_ORDERLINES + ".ol_number", ol.getInteger("ol_number"));
+            targetedOrderline.put(Order.O_W_ID, order.getInteger(Order.O_W_ID));
+            targetedOrderline.put(Order.O_D_ID, order.getInteger(Order.O_D_ID));
+            targetedOrderline.put(Order.O_ID, order.getInteger(Order.O_ID));
+            targetedOrderline.put(Order.O_ORDERLINES + "." + OrderLine.OL_NUMBER, ol.getInteger(OrderLine.OL_NUMBER));
 
             Document carrier = new Document();
             Document set = new Document("$set", carrier);
-            carrier.put(Order.O_ORDERLINES + ".$.ol_delivery_d", OL_DELIVERY_D);
+            carrier.put(Order.O_ORDERLINES + ".$." + OrderLine.OL_DELIVERY_D, OL_DELIVERY_D);
 
             orderOrderlineCollection.updateOne(targetedOrderline, set);
         }
@@ -112,11 +112,11 @@ class DeliveryTransaction {
     }
 
     private void updateOrderCarrierId(Document order, int CARRIER_ID) {
-        MongoCollection<Document> orderOrderlinecollection = database.getCollection("orders");
+        MongoCollection<Document> orderOrderlinecollection = database.getCollection(Table.ORDER);
 
         Document carrier = new Document();
         Document set = new Document("$set", carrier);
-        carrier.put("o_carrier_id", CARRIER_ID);
+        carrier.put(Order.O_CARRIER_ID, CARRIER_ID);
 
         orderOrderlinecollection.updateOne(order, set);
     }
@@ -125,20 +125,20 @@ class DeliveryTransaction {
      * Find the smallest order number O_ID for district(W_ID, DISTRICT_NO) with O_CARRIER_ID = null
      */
     private Document selectOldestOrder(int W_ID, int D_ID) {
-        MongoCollection<Document> orderOrderlinecollection = database.getCollection("orders");
+        MongoCollection<Document> orderOrderlinecollection = database.getCollection(Table.ORDER);
 
         Document searchOldestOrderQuery = new Document();
-        searchOldestOrderQuery.append("o_w_id", W_ID);
-        searchOldestOrderQuery.append("o_d_id", D_ID);
-        searchOldestOrderQuery.append("o_carrier_id", "null");
+        searchOldestOrderQuery.append(Order.O_W_ID, W_ID);
+        searchOldestOrderQuery.append(Order.O_D_ID, D_ID);
+        searchOldestOrderQuery.append(Order.O_CARRIER_ID, "null");
 
         Document sortQuery = new Document();
-        sortQuery.append("o_id", 1);
+        sortQuery.append(Order.O_ID, 1);
 
         FindIterable<Document> orders = orderOrderlinecollection.find(searchOldestOrderQuery).sort(sortQuery).limit(1);
         Document result = orders.first();
 
-        System.out.println("Oldest order (with null carrier id) is: " + result.getInteger("o_id"));
+        System.out.println("Oldest order (with null carrier id) is: " + result.getInteger(Order.O_ID));
         return result;
     }
 }
