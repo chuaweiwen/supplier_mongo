@@ -1,19 +1,16 @@
 package main.java;
 
-import static com.mongodb.client.model.Filters.and;
+
 import static com.mongodb.client.model.Filters.eq;
 
-import com.mongodb.BasicDBObject;
+import java.util.List;
+
+import org.bson.Document;
+
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import org.bson.Document;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 class StockLevelTransaction {
     private static String STOCK_TABLE = Table.STOCK;
@@ -42,7 +39,6 @@ class StockLevelTransaction {
         int count = 0;
         int D_NEXT_O_ID = -1;
 
-        Set<Integer> items = new HashSet<Integer>();
         MongoCollection<Document> warehouseDistrictCollection = database.getCollection(WAREHOUSE_DISTRICT);
         orderOrderLineCollection = database.getCollection(ORDER_ORDERLINE);
         stockTableCollection = database.getCollection(STOCK_TABLE);
@@ -55,63 +51,66 @@ class StockLevelTransaction {
 
         // 1. Let N denote the value of the next available order number D NEXT O ID for district (W ID,D ID)
         Document targetWarehouse = warehouseDistrictCollection.find(eq(Warehouse.W_ID, W_ID)).first();
-        List<Document> districts = (List<Document>) targetWarehouse.get("w_districts");
-        Document targetDistrict = districts.get(D_ID-1);
+        List<Document> districts = (List<Document>) targetWarehouse.get(Warehouse.W_DISTRICTS);
+
+        Document targetDistrict = null;
+        for (Document eachDistrict : districts) {
+            if (eachDistrict.getInteger(District.D_ID) == D_ID) {
+                targetDistrict = eachDistrict;
+                break;
+            }
+        }
+
         D_NEXT_O_ID = targetDistrict.getInteger(District.D_NEXT_O_ID);
+        //System.out.println(D_NEXT_O_ID);
 
         // 2. Let S denote the set of items from the last L orders for district (W ID,D ID); i.e.,
-        for (int i = (D_NEXT_O_ID + 1 - L); i < D_NEXT_O_ID; i++) {
-            BasicDBObject orderOrderlineSearchQuery = new BasicDBObject();
-            orderOrderlineSearchQuery.append(Order.O_W_ID, W_ID);
-            orderOrderlineSearchQuery.append(Order.O_D_ID, D_ID);
-            orderOrderlineSearchQuery.append(Order.O_ID, i);
+        //int c = 1;
 
-            Document targetOrderOrderline = orderOrderLineCollection.find(orderOrderlineSearchQuery).first();
-            List<Document> targetOrderlines = (List<Document>) targetOrderOrderline.get(Order.O_ORDERLINES);
+        if ((D_NEXT_O_ID - L) > 0) {
 
-            for (Document eachOrderline : targetOrderlines) {
-                int OL_I_ID = eachOrderline.getInteger(OrderLine.OL_I_ID);
+            for (int i = (D_NEXT_O_ID - L); i < D_NEXT_O_ID; i++) {
+                //System.out.println(c++ + ". " + i);
+                Document orderOrderlineSearchQuery = new Document();
+                orderOrderlineSearchQuery.append(Order.O_W_ID, W_ID);
+                orderOrderlineSearchQuery.append(Order.O_D_ID, D_ID);
+                orderOrderlineSearchQuery.append(Order.O_ID, i);
 
-                BasicDBObject stockSearchQuery = new BasicDBObject();
-                stockSearchQuery.append(Stock.S_W_ID, W_ID);
-                stockSearchQuery.append(Stock.S_I_ID, OL_I_ID);
+                Document targetOrderOrderline = orderOrderLineCollection.find(orderOrderlineSearchQuery).first();
+                if (targetOrderOrderline == null) {
+                    System.out.println("Oops, no such O_ID - D_NEXT_O_ID: " + D_NEXT_O_ID + ", O_ID: " + i);
+                }
 
-                MongoCursor<Document> stockCursor = stockTableCollection.find(stockSearchQuery).iterator();
-                while (stockCursor.hasNext()) {
-                    Document stockDocument = stockCursor.next();
-                    double quantity = 0.0;
-                    try {
-                        quantity = stockDocument.getDouble(Stock.S_QUANTITY);
-                    } catch (ClassCastException e) {
-                        quantity = (double) stockDocument.getInteger(Stock.S_QUANTITY);
-                    }
-                    if(quantity < (double) T) {
-                        count++;
+                List<Document> targetOrderlines = (List<Document>) targetOrderOrderline.get(Order.O_ORDERLINES);
+
+                for (Document eachOrderline : targetOrderlines) {
+                    int OL_I_ID = eachOrderline.getInteger(OrderLine.OL_I_ID);
+
+                    Document stockSearchQuery = new Document();
+                    stockSearchQuery.append(Stock.S_W_ID, W_ID);
+                    stockSearchQuery.append(Stock.S_I_ID, OL_I_ID);
+
+                    // 3. Output the total number of items in S where its stock quantity at W ID is below the threshold;
+                    MongoCursor<Document> stockCursor = stockTableCollection.find(stockSearchQuery).iterator();
+                    while (stockCursor.hasNext()) {
+                        Document stockDocument = stockCursor.next();
+                        double quantity = 0.0;
+                        try {
+                            quantity = stockDocument.getDouble(Stock.S_QUANTITY);
+                        } catch (ClassCastException e) {
+                            quantity = (double) stockDocument.getInteger(Stock.S_QUANTITY);
+                        }
+                        if (quantity < (double) T) {
+                            count++;
+                        }
                     }
                 }
-                //items.add(OL_I_ID);
             }
+
+            System.out.println(count);
+
+        } else {
+            System.out.println("Oops, Warehouse " + W_ID + " District " + D_ID + " have less than " + L + " orders.");
         }
-
-        // 3. Output the total number of items in S where its stock quantity at W ID is below the threshold;
-        /* Old code for reference
-        for (int itemId : items) {
-            BasicDBObject stockSearchQuery = new BasicDBObject();
-            stockSearchQuery.append("s_w_id", W_ID);
-            stockSearchQuery.append("s_i_id", itemId);
-
-            MongoCursor<Document> stockCursor = stockTableCollection.find(stockSearchQuery).iterator();
-            while (stockCursor.hasNext()) {
-                Document stockDocument = stockCursor.next();
-                int quantity = stockDocument.getInteger("s_quantity");
-                if(quantity < T) {
-                    count++;
-                }
-            }
-        }
-        */
-
-        System.out.println(count);
-
     }
 }
