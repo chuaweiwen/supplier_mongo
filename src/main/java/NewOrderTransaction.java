@@ -97,7 +97,8 @@ public class NewOrderTransaction {
                     .append(OrderLine.OL_O_ID, nextOId)
                     .append(OrderLine.OL_I_ID, iId);
 
-            Document orderLine = modifiedOrderLine.append(OrderLine.OL_NUMBER, i)
+            Document orderLine = new Document(modifiedOrderLine)
+                    .append(OrderLine.OL_NUMBER, i)
                     .append(OrderLine.OL_I_NAME, itemName)
                     .append(OrderLine.OL_AMOUNT, itemAmount)
                     .append(OrderLine.OL_SUPPLY_W_ID, iWId)
