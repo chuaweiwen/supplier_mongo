@@ -3,6 +3,7 @@ package main.java;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -44,10 +45,13 @@ public class RelatedCustomerTransaction {
             orderLineSearchQuery.append(OrderLine.OL_D_ID, d_id);
             orderLineSearchQuery.append(OrderLine.OL_O_ID, o_id);
 
-            MongoCursor<Document> orderLineCursor = orderLineTable.find(orderLineSearchQuery).iterator();//get all orderlines of main customer
+            List<Document> orderLines = (List<Document>) orderDocument.get(Order.O_ORDERLINES);
+
+            //MongoCursor<Document> orderLineCursor = orderLineTable.find(orderLineSearchQuery).iterator();//get all orderlines of main customer
             MongoCursor<Document> sameItemOrder;
-            while(orderLineCursor.hasNext()) { //go thru each orderline for each item
-                Document orderLineObject = orderLineCursor.next();
+            for (Document orderLineObject : orderLines) {
+            //while(orderLineCursor.hasNext()) { //go thru each orderline for each item
+                //Document orderLineObject = orderLineCursor.next();
                 int ol_i_id = orderLineObject.getInteger(OrderLine.OL_I_ID); //get the item id which is distinct
                 //if(storedIntermeResults.containsKey(ol_i_id)) {
                  //   sameItemOrder = storedIntermeResults.get(ol_i_id);
