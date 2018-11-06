@@ -25,6 +25,8 @@ public class Main {
         String consistencyLevel = configData[3];
         int numTransactions = Integer.parseInt(configData[4]);
 
+        long startTime = System.nanoTime();
+
         ExecutorService executorService = Executors.newFixedThreadPool(Math.max(1, numTransactions));
         List<Future<ClientStatistics>> results = new ArrayList<Future<ClientStatistics>>();
 
@@ -53,6 +55,10 @@ public class Main {
         outputPerformanceResults(statisticsMap, consistencyLevel, numTransactions);
         System.out.println("\nAll " + numTransactions + " clients have completed their transactions.");
         System.out.println("Number of transactions with error: " + numXactError);
+
+        long endTime = System.nanoTime() - startTime;
+        double endTimeInSeconds = endTime / 1000000000.0;
+        System.out.println("Total time taken: " + endTimeInSeconds + " s (" + (endTimeInSeconds / 60.0) + " mins)");
     }
 
     public static String[] readConfigFile() {
