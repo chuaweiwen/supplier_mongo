@@ -1,11 +1,14 @@
 package main.java;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +28,18 @@ public class Main {
         String consistencyLevel = configData[3];
         int numTransactions = Integer.parseInt(configData[4]);
 
+        try {
+            BufferedWriter out = new BufferedWriter(
+                    new FileWriter(databaseName + ".log", true));
+            Date date = new Date();
+            out.write(date + " Connecting to " + host + ":" + port + "\n");
+            out.write(date + " Database: " + databaseName + "\n");
+            out.write(date + " Begin experiment " + consistencyLevel + " " + numTransactions + "\n");
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         long startTime = System.nanoTime();
 
         ExecutorService executorService = Executors.newFixedThreadPool(Math.max(1, numTransactions));
@@ -38,7 +53,6 @@ public class Main {
 
         Map<Integer, ClientStatistics> statisticsMap = new HashMap<Integer, ClientStatistics>();
         int numXactError = 0;
-        String errorMessage = "";
         for (Future<ClientStatistics> future : results) {
             try {
                 ClientStatistics statistics = future.get();
@@ -56,9 +70,21 @@ public class Main {
         System.out.println("\nAll " + numTransactions + " clients have completed their transactions.");
         System.out.println("Number of transactions with error: " + numXactError);
 
-        long endTime = System.nanoTime() - startTime;
-        double endTimeInSeconds = endTime / 1000000000.0;
-        System.out.println("Total time taken: " + endTimeInSeconds + " s (" + (endTimeInSeconds / 60.0) + " mins)");
+        try {
+            long endTime = System.nanoTime() - startTime;
+            double endTimeInSeconds = endTime / 1000000000.0;
+            System.out.println("Total time taken: " + endTimeInSeconds + " s (" + (endTimeInSeconds / 60.0) + " mins)");
+
+            BufferedWriter out = new BufferedWriter(
+                    new FileWriter(databaseName + ".log", true));
+            Date date = new Date();
+            out.write(date + " All " + numTransactions + " clients have completed their transactions.\n");
+            out.write(date + " Number of transactions with error: " + numXactError + "\n");
+            out.write(date + " Total time taken: " + endTimeInSeconds + " s (" + (endTimeInSeconds / 60.0) + " mins)\n");
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static String[] readConfigFile() {
@@ -104,10 +130,10 @@ public class Main {
         String outputPath = Constant.getPerformanceOutputPath(consistencyLevel, numTransactions);
 
         try {
-            PrintWriter out = new PrintWriter(outputPath);
-            out.println("Consistency level: " + consistencyLevel);
-            out.println("Number of clients: " + numTransactions);
-            out.println();
+            BufferedWriter out = new BufferedWriter(
+                    new FileWriter(outputPath, true));
+            out.write("Consistency level: " + consistencyLevel + "\n");
+            out.write("Number of clients: " + numTransactions + "\n\n");
             ClientStatistics min = statisticsMap.get(1);
             for (int i = 1; i <= numClients; i++) {
                 min = statisticsMap.get(i);
@@ -115,7 +141,7 @@ public class Main {
                     break;
             }
             if (min == null) {
-                out.println("No transactions found");
+                out.write("No transactions found\n");
                 out.close();
                 return;
             }
@@ -136,10 +162,9 @@ public class Main {
             for (int i = 1; i <= numClients; i++) {
                 ClientStatistics stats = statisticsMap.get(i);
                 if (stats == null) {
-                    out.println("Performance measure for client with index: " + i);
-                    out.println("Data unavailable - Runtime error encountered.");
-                    out.println("=========================================");
-                    out.println();
+                    out.write("Performance measure for client with index: " + i + "\n");
+                    out.write("Data unavailable - Runtime error encountered.\n");
+                    out.write("=========================================\n\n");
                     continue;
                 }
                 long totalTransactionCount = stats.getTotalTransactionCount();
@@ -167,36 +192,36 @@ public class Main {
                 double topBalanceExecutionTime = (double) executionTimeStats[6] / 1000000000;
                 double relatedCustomerExecutionTime = (double) executionTimeStats[7] / 1000000000;
 
-                out.println("Performance measure for client with index: " + i);
-                out.println("Total Number of Executed Transactions: " + totalTransactionCount);
-                out.println("Total Execution Time: " + totalExecutionTime);
-                out.println("Transaction throughput: " + throughput);
-                out.println("-------------------------------------");
-                out.println("New Order: " + newOrderTransactionCount + " " + newOrderExecutionTime);
-                out.println("Payment: " + paymentTransactionCount + " " + paymentExecutionTime);
-                out.println("Delivery Status: " + deliveryTransactionCount + " " + deliveryExecutionTime);
-                out.println("Order Status: " + orderStatusTransactionCount + " " + orderStatusExecutionTime);
-                out.println("Stock Level: " + stockLevelTransactionCount + " " + stockLevelExecutionTime);
-                out.println("Popular Item: " + popularItemTransactionCount + " " + popularItemExecutionTime);
-                out.println("Top Balance: " + topBalanceTransactionCount + " " + topBalanceExecutionTime);
-                out.println("Related Customer: " + relatedCustomerTransactionCount + " " + relatedCustomerExecutionTime);
-                out.println("=========================================");
-                out.println();
+                out.write("Performance measure for client with index: " + i + "\n");
+                out.write("Total Number of Executed Transactions: " + totalTransactionCount + "\n");
+                out.write("Total Execution Time: " + totalExecutionTime + "\n");
+                out.write("Transaction throughput: " + throughput + "\n");
+                out.write("-------------------------------------" + "\n");
+                out.write("New Order: " + newOrderTransactionCount + " " + newOrderExecutionTime + "\n");
+                out.write("Payment: " + paymentTransactionCount + " " + paymentExecutionTime + "\n");
+                out.write("Delivery Status: " + deliveryTransactionCount + " " + deliveryExecutionTime + "\n");
+                out.write("Order Status: " + orderStatusTransactionCount + " " + orderStatusExecutionTime + "\n");
+                out.write("Stock Level: " + stockLevelTransactionCount + " " + stockLevelExecutionTime + "\n");
+                out.write("Popular Item: " + popularItemTransactionCount + " " + popularItemExecutionTime + "\n");
+                out.write("Top Balance: " + topBalanceTransactionCount + " " + topBalanceExecutionTime + "\n");
+                out.write("Related Customer: " + relatedCustomerTransactionCount + " " + relatedCustomerExecutionTime + "\n");
+                out.write("=========================================\n\n");
             }
 
-            out.println("== End of Performance Measure for each Client ==");
-            out.println();
+            out.write("== End of Performance Measure for each Client ==\n\n");
 
             // Output minimum, maximum and average throughput
-            out.println("Minimum transaction throughput is the client with index " + (min.getIndex())
-                    + " with throughput: " + min.getThroughput());
-            out.println("Maximum transaction throughput is the client with index " + (max.getIndex())
-                    + " with throughput: " + max.getThroughput());
-            out.println("Average transaction throughput is: " + (totalThroughput / numClients));
+            out.write("Minimum transaction throughput is the client with index " + (min.getIndex())
+                    + " with throughput: " + min.getThroughput() + "\n");
+            out.write("Maximum transaction throughput is the client with index " + (max.getIndex())
+                    + " with throughput: " + max.getThroughput() + "\n");
+            out.write("Average transaction throughput is: " + (totalThroughput / numClients) + "\n\n");
 
             out.close();
         } catch (FileNotFoundException e) {
             System.out.println("Error in outputting performance results.");
+            e.printStackTrace();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
