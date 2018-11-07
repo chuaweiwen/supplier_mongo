@@ -15,7 +15,7 @@ The following application is required to compile and run the application:
 
 ## Configuration
 
-The following are the instructions to configure MongoDB for the application. We assume that there will be 5 servers and we are using UNIX.
+The following are the instructions to configure MongoDB for the application using five servers.
 
 ### Installation of MongoDB
 
@@ -242,7 +242,7 @@ sh.shardCollection("supplier.stock", { s_w_id : 1, s_i_id: 1 })
 sh.startBalancer()
 ```
 
-5. Wait until the balancer stops running. To check if the balancer running, run this command:
+5. Wait until the balancer stops running. To check if the balancer is running, run this command:
 ```aidl
 sh.isBalancerRunning()
 ```
