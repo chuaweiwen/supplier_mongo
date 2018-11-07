@@ -251,7 +251,7 @@ sh.isBalancerRunning()
 
 1. Create a folder `xact`, if not available, in the same file level as your program `src` folder.
 2. Insert the xact files (in .txt format) into the `xact` folder.
-3. Edit the values `config.env` according to the experiment you want to run. For example, to run with consistency level `local` with `40` clients:
+3. Edit the values in `config.env` according to the experiment you want to run. For example, to run with consistency level `local` with `40` clients:
 ```aidl
 HOST=xcnd20.comp.nus.edu.sg
 PORT=21100
