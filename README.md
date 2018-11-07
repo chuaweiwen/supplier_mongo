@@ -11,7 +11,6 @@ The following application is required to compile and run the application:
 - [MongoDB 4.0](https://www.mongodb.com/download-center/community) and above
 - [Java 8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) and above
 - [Maven 3.5.4](https://maven.apache.org/download.cgi) and above
-- [Datastax 3.3.9](https://academy.datastax.com/quick-downloads) and above
 
 ## Configuration
 
