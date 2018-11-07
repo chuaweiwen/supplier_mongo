@@ -216,7 +216,7 @@ NUMBER_OF_TRANSACTIONS=10
 
 ### Enable Sharding
 
-1. After importing the data, go to the first server and go to `/temp/mongo`.
+1. After importing the data, go to the first server and go to `/temp/mongodb`.
 2. Connect to `mongos` using the command:
 ```aidl
 bin/mongo --host [host]:21100
@@ -259,4 +259,5 @@ CONSISTENCY_LEVEL=local
 NUMBER_OF_TRANSACTIONS=40
 ```
 4. Run `java -Xms4096m -Xmx4096m -cp target/*:target/dependency/*:. main.java.Main` to run the experiment.
+5. At the end of the experiment, a file `performance_output_10_local.txt` will be created on the project root folder (if you run with consistency level `local` and `10` clients) that lists the number of executed transactions, time taken, and the throughput for each client.
 
