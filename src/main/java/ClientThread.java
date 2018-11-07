@@ -180,7 +180,7 @@ public class ClientThread implements Callable<ClientStatistics> {
                     BufferedWriter out = new BufferedWriter(
                             new FileWriter(database + ".log", true));
                     Date date = new Date();
-                    out.write(date + " Client " + index + " has read " + i + " transactions.\n");
+                    out.write(date + " Client " + index + " has executed " + i + " transactions.\n");
                     out.close();
                 }
                 input = reader.readLine();
@@ -189,7 +189,7 @@ public class ClientThread implements Callable<ClientStatistics> {
             BufferedWriter out = new BufferedWriter(
                     new FileWriter(database + ".log", true));
             Date date = new Date();
-            out.write(date + " Client " + index + " has completed all its transactions.\n");
+            out.write(date + " Client " + index + " has executed all its transactions.\n");
             out.close();
             reader.close();
         } catch (Exception e) {
