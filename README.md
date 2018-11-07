@@ -259,5 +259,5 @@ CONSISTENCY_LEVEL=local
 NUMBER_OF_TRANSACTIONS=40
 ```
 4. Run `java -Xms4096m -Xmx4096m -cp target/*:target/dependency/*:. main.java.Main` to run the experiment.
-5. At the end of the experiment, a file `performance_output_10_local.txt` will be created on the project root folder (if you run with consistency level `local` and `10` clients) that lists the number of executed transactions, time taken, and the throughput for each client.
+5. At the end of the experiment, a file `performance_output_10_local.txt` will be created on the project root folder (if you run with consistency level `local` and `10` clients) that lists the number of executed transactions, time taken to execute the transactions, and the throughput for each client.
 
