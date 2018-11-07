@@ -204,7 +204,7 @@ bin/mongoimport -d supplier -c stock --type csv --file raw_data/stock.csv --fiel
 3. Leave the server and go to the root directory where the project files are located.
 4. Compile the project via `mvn clean dependency:copy-dependencies package`.
 - If the `mvn` command is not available, type the command: `export PATH=<file location of Apache Maven>:$PATH` (e.g. `export PATH=/home/stuproj/cs4224e/apache-maven-3.5.4/bin:$PATH`), then run the `mvn` command again.
-5. Copy `config.env.example` and place it on the same directory with the name `config.env`.
+5. Copy `config.env.example` and place it on the same directory and rename it to `config.env`.
 6. Change the values in `config.env` and change the `HOST` value to the hostname of the first server, and `PORT` to `21100` (i.e. port number for the `mongos` instance). Change the value for the `DATABASE` to the name of your database. For example:
 ```aidl
 HOST=xcnd20.comp.nus.edu.sg
@@ -260,4 +260,5 @@ DATABASE=supplier
 CONSISTENCY_LEVEL=local
 NUMBER_OF_TRANSACTIONS=40
 ```
+5. Run `java -Xms4096m -Xmx4096m -cp target/*:target/dependency/*:. main.java.Main` to run the experiment.
 
