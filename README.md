@@ -247,7 +247,7 @@ sh.startBalancer()
 sh.isBalancerRunning()
 ```
 
-### Performance Measurement
+## Performance Measurement
 
 1. Create a folder `xact`, if not available, in the same file level as your program `src` folder.
 2. Insert the xact files (in .txt format) into the `xact` folder.
