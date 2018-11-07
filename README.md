@@ -251,8 +251,7 @@ sh.isBalancerRunning()
 
 1. Create a folder `xact`, if not available, in the same file level as your program `src` folder.
 2. Insert the xact files (in .txt format) into the `xact` folder.
-3. Copy `config.env.example` and place it on the same directory and rename it to `config.env`.
-4. Edit the values `config.env` according to the experiment you want to run. For example, to run with consistency level `local` with `40` clients:
+3. Edit the values `config.env` according to the experiment you want to run. For example, to run with consistency level `local` with `40` clients:
 ```aidl
 HOST=xcnd20.comp.nus.edu.sg
 PORT=21100
@@ -260,5 +259,5 @@ DATABASE=supplier
 CONSISTENCY_LEVEL=local
 NUMBER_OF_TRANSACTIONS=40
 ```
-5. Run `java -Xms4096m -Xmx4096m -cp target/*:target/dependency/*:. main.java.Main` to run the experiment.
+4. Run `java -Xms4096m -Xmx4096m -cp target/*:target/dependency/*:. main.java.Main` to run the experiment.
 
