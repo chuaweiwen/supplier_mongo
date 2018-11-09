@@ -106,7 +106,7 @@ public class RelatedCustomerTransaction {
             Document orderCursor = ordersTable.find(ordersSearchQuery).first();
 
             if(wid!=keyToCust.get(pair.getKey()).get(0) && did!=keyToCust.get(pair.getKey()).get(1) && cid!=orderCursor.getInteger(Order.O_C_ID))
-                //System.out.println("cus_id: "+orderCursor.getInteger(Order.O_C_ID)+" district_id: "+keyToCust.get(pair.getKey()).get(1)+" warehouse_id: "+keyToCust.get(pair.getKey()).get(0));
+                System.out.println("cus_id: "+orderCursor.getInteger(Order.O_C_ID)+" district_id: "+keyToCust.get(pair.getKey()).get(1)+" warehouse_id: "+keyToCust.get(pair.getKey()).get(0));
             it.remove(); // avoids a ConcurrentModificationException
         }
     }
