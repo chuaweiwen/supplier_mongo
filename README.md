@@ -31,11 +31,11 @@ We will setting up the configuration servers at port `21000`.
 1. Go to one of the configuration servers as mentioned in the previous section, go to the directory `/temp/mongodb`.
 2. Run the following command (replace `[host]` with the IP address of the current server):
 ```
-bin/mongod --fork --configsvr --directoryperdb --pidfilepath pid --dbpath data/cfgsvr --logpath log/cfgsvr.log --replSet cfg --port 21000 --bind_ip [host]
+bin/mongod --fork --configsvr --directoryperdb --dbpath data/cfgsvr --logpath log/cfgsvr.log --replSet cfg --port 21000 --bind_ip [host]
 ```
 - Example:
 ```
-bin/mongod --fork --configsvr --directoryperdb --pidfilepath pid --dbpath data/cfgsvr --logpath log/cfgsvr.log --replSet cfg --port 21000 --bind_ip xcnd20.comp.nus.edu.sg
+bin/mongod --fork --configsvr --directoryperdb --dbpath data/cfgsvr --logpath log/cfgsvr.log --replSet cfg --port 21000 --bind_ip xcnd20.comp.nus.edu.sg
 ```
 
 3. Repeat Step 1 and 2 with the other two servers.
@@ -86,14 +86,14 @@ In this example we will be setting up five replica sets.
 
 2. Go to the first server and run the following command:
 ```
-bin/mongod --fork --shardsvr --directoryperdb --pidfilepath pidshard[x] --dbpath data/shard[x] --logpath log/shard[x].log --replSet shard[x] --port [port] --bind_ip [host]
+bin/mongod --fork --shardsvr --directoryperdb --dbpath data/shard[x] --logpath log/shard[x].log --replSet shard[x] --port [port] --bind_ip [host]
 ```
 
 - Example to set up `shard0`, `shard4`, and `shard5` at server 1 `xcnd20.comp.nus.edu.sg` at port `21001`:
 ```aidl
-bin/mongod --fork --shardsvr --directoryperdb --pidfilepath pidshard0 --dbpath data/shard0 --logpath log/shard0.log --replSet shard0 --port 21001 --bind_ip xcnd20.comp.nus.edu.sg
-bin/mongod --fork --shardsvr --directoryperdb --pidfilepath pidshard3 --dbpath data/shard3 --logpath log/shard3.log --replSet shard3 --port 21004 --bind_ip xcnd20.comp.nus.edu.sg
-bin/mongod --fork --shardsvr --directoryperdb --pidfilepath pidshard4 --dbpath data/shard4 --logpath log/shard4.log --replSet shard4 --port 21005 --bind_ip xcnd20.comp.nus.edu.sg
+bin/mongod --fork --shardsvr --directoryperdb --dbpath data/shard0 --logpath log/shard0.log --replSet shard0 --port 21001 --bind_ip xcnd20.comp.nus.edu.sg
+bin/mongod --fork --shardsvr --directoryperdb --dbpath data/shard3 --logpath log/shard3.log --replSet shard3 --port 21004 --bind_ip xcnd20.comp.nus.edu.sg
+bin/mongod --fork --shardsvr --directoryperdb --dbpath data/shard4 --logpath log/shard4.log --replSet shard4 --port 21005 --bind_ip xcnd20.comp.nus.edu.sg
 ```
 
 3. Repeat Step 2 for the other four servers with the corresponding shard number and port number.
@@ -112,7 +112,7 @@ rs.initiate(
         members: [
             { _id : 0, host : "x:21001" },
             { _id : 1, host : "y:21001" },
-            { _id : 2, host : "z:21001" },
+            { _id : 2, host : "z:21001" }
         ]
     }
 )
@@ -126,7 +126,7 @@ rs.initiate(
         members: [
             { _id : 0, host : "xcnd20.comp.nus.edu.sg:21001" },
             { _id : 1, host : "xcnd21.comp.nus.edu.sg:21001" },
-            { _id : 2, host : "xcnd22.comp.nus.edu.sg:21001" },
+            { _id : 2, host : "xcnd22.comp.nus.edu.sg:21001" }
         ]
     }
 )
@@ -141,12 +141,12 @@ We will be setting up `mongos` at each server at port `21100`.
 1. Go to the first server to go to `temp/mongodb`.
 2. Enter the following command:
 ```
-bin/mongos --fork --pidfilepath pidmongos --logpath log/mongos_[n].log --configdb cfg/x:21000,y:21000,z:21000 --port 21100 --bind_ip [host]
+bin/mongos --fork --logpath log/mongos_[n].log --configdb cfg/x:21000,y:21000,z:21000 --port 21100 --bind_ip [host]
 ```
 - where `[n]` is the server number minus one (e.g. first server is 0, second is 1 etc.), `x` and `y` and `z` are the three host names of the configuration servers, and `[host]` is the host name of the current server.
 - Example for the first server `xcnd20.comp.nus.edu.sg`:
 ```aidl
-bin/mongos --fork --pidfilepath pidmongos --logpath log/mongos_0.log --configdb cfg/xcnd20.comp.nus.edu.sg:21000,xcnd21.comp.nus.edu.sg:21000,xcnd22.comp.nus.edu.sg:21000 --port 21100 --bind_ip xcnd20.comp.nus.edu.sg
+bin/mongos --fork --logpath log/mongos_0.log --configdb cfg/xcnd20.comp.nus.edu.sg:21000,xcnd21.comp.nus.edu.sg:21000,xcnd22.comp.nus.edu.sg:21000 --port 21100 --bind_ip xcnd20.comp.nus.edu.sg
 ```
 
 3. Repeat Step 1 to 2 on the other four servers.
