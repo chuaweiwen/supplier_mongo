@@ -72,7 +72,7 @@ class StockLevelTransaction {
 
                 Document targetOrderOrderline = orderOrderLineCollection.find(orderOrderlineSearchQuery).first();
                 if (targetOrderOrderline == null) {
-                    System.out.println("Oops, no such order - " + "O_ID: " + i);
+                    //System.err.println("Oops, no such order - " + "O_ID: " + i);
                 } else {
                     List<Document> targetOrderlines = (List<Document>) targetOrderOrderline.get(Order.O_ORDERLINES);
 
@@ -104,7 +104,7 @@ class StockLevelTransaction {
             System.out.println(count);
 
         } else {
-            System.out.println("Oops, Warehouse " + W_ID + " District " + D_ID + " have less than " + L + " orders.");
+            //System.err.println("Oops, Warehouse " + W_ID + " District " + D_ID + " have less than " + L + " orders.");
         }
     }
 }

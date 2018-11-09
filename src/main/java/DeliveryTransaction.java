@@ -72,7 +72,7 @@ class DeliveryTransaction {
         int C_LAST_O_ID = customer.getInteger(Customer.C_LAST_O_ID);
         if (C_LAST_O_ID == order.getInteger(Order.O_ID)) {
             carrier.put(Customer.C_LAST_O_CARRIER_ID, CARRIER_ID);
-            System.out.println("Update C_LAST_O_CARRIER_ID : " + C_LAST_O_ID + " " + CARRIER_ID);
+            //System.out.println("Update C_LAST_O_CARRIER_ID : " + C_LAST_O_ID + " " + CARRIER_ID);
         }
 
         collection.updateOne(find, set);
@@ -138,7 +138,7 @@ class DeliveryTransaction {
         FindIterable<Document> orders = orderOrderlinecollection.find(searchOldestOrderQuery).sort(sortQuery).limit(1);
         Document result = orders.first();
 
-        System.out.println("Oldest order (with null carrier id) is: " + result.getInteger(Order.O_ID));
+        //System.out.println("Oldest order (with null carrier id) is: " + result.getInteger(Order.O_ID));
         return result;
     }
 }
